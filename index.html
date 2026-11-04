@@ -654,6 +654,15 @@
       overflow: hidden;
       background: linear-gradient(145deg, rgba(74, 14, 23, .86), rgba(20, 7, 12, .7));
       border-radius: 6px;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .portrait-frame:hover,
+    .portrait-frame:focus-visible {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .28);
+      outline: none;
     }
 
     .portrait-frame::after {
@@ -1116,7 +1125,7 @@
       </div>
       <div class="nominee-grid" id="nominee-grid"></div>
       <p class="nominee-confirmation" id="nominee-confirmation" role="status" aria-live="polite"></p>
-      <button class="submit-vote" id="submit-vote" type="button" disabled>Submit vote</button>
+      <button class="submit-vote" id="submit-vote" type="button">Continue voting</button>
       <nav class="nominee-navigation" aria-label="Category navigation">
         <button id="previous-category" type="button" aria-label="Go to previous category">
           <svg viewBox="0 0 52 18" aria-hidden="true"><line x1="50" y1="9" x2="4" y2="9"></line><path d="M12 3 4 9l8 6"></path></svg>
@@ -1224,19 +1233,29 @@
         : '';
       nomineeGrid.innerHTML = names.map((name, index) => `
         <article class="nominee">
-          <div class="portrait-frame">${portraitSvg(index, feminine)}</div>
+          <div class="portrait-frame" role="button" tabindex="0" aria-label="Vote for ${escapeHtml(name)}" data-nominee="${escapeHtml(name)}">${portraitSvg(index, feminine)}</div>
           <span class="nominee-rank">${['First choice', 'Second choice', 'Third choice'][index]}</span>
           <h3>${escapeHtml(name)}</h3>
           <button class="nominee-vote${votedCategories.get(categoryIndex) === name ? ' is-selected' : ''}" type="button" data-nominee="${escapeHtml(name)}">${votedCategories.get(categoryIndex) === name ? 'Vote recorded' : 'Vote for this nominee'}</button>
         </article>`).join('');
-      nomineeGrid.querySelectorAll('.nominee-vote').forEach((button) => {
-        button.addEventListener('click', () => {
-          votedCategories.set(categoryIndex, button.dataset.nominee);
-          updateProgress();
-          if (categoryIndex < categoryData.length - 1) {
-            window.setTimeout(() => showNominees(categoryIndex + 1), 450);
-          } else {
-            showNominees(categoryIndex);
+      const recordVote = (nominee) => {
+        votedCategories.set(categoryIndex, nominee);
+        updateProgress();
+        if (categoryIndex < categoryData.length - 1) {
+          window.setTimeout(() => showNominees(categoryIndex + 1), 450);
+        } else {
+          showNominees(categoryIndex);
+        }
+      };
+
+      nomineeGrid.querySelectorAll('.nominee-vote, .portrait-frame').forEach((choice) => {
+        choice.addEventListener('click', () => {
+          recordVote(choice.dataset.nominee);
+        });
+        choice.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            recordVote(choice.dataset.nominee);
           }
         });
       });
@@ -1256,12 +1275,15 @@
       document.querySelector('#nominee-progress-label').textContent = `${count} of ${categoryData.length} categories voted`;
       document.querySelector('#nominee-progress-percent').textContent = `${percent}%`;
       document.querySelector('#nominee-progress-value').style.width = `${percent}%`;
-      submitVote.disabled = count !== categoryData.length;
+      submitVote.disabled = false;
+      submitVote.textContent = count === categoryData.length ? 'Submit vote' : 'Continue voting';
       document.querySelectorAll('.category-item').forEach((item, index) => {
         item.classList.toggle('is-voted', votedCategories.has(index));
         const content = item.children[1];
         if (votedCategories.has(index) && !content.querySelector('.category-check')) {
           content.insertAdjacentHTML('beforeend', '<span class="category-check">✓ Voted</span>');
+        } else if (!votedCategories.has(index)) {
+          content.querySelector('.category-check')?.remove();
         }
       });
     };
@@ -1307,7 +1329,12 @@
     });
 
     submitVote.addEventListener('click', () => {
-      if (votedCategories.size === categoryData.length) confirmationModal.hidden = false;
+      if (votedCategories.size === categoryData.length) {
+        confirmationModal.hidden = false;
+        return;
+      }
+      const nextUnvoted = categoryData.findIndex((_, index) => !votedCategories.has(index));
+      if (nextUnvoted >= 0) showNominees(nextUnvoted);
     });
 
     cancelSubmit.addEventListener('click', () => {
