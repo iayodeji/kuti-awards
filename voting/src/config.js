@@ -1,31 +1,29 @@
-// EDIT THIS: your categories and nominees. IDs must stay stable once voting starts.
-// The server validates every vote against this list, so nobody can vote for an unknown nominee.
+// Category and nominee IDs are part of the stored vote records.
 export const CATEGORIES = [
-  {
-    id: "best-newcomer",
-    name: "Best Newcomer",
-    nominees: [
-      { id: "bn-1", name: "Nominee One" },
-      { id: "bn-2", name: "Nominee Two" },
-      { id: "bn-3", name: "Nominee Three" },
-    ],
-  },
-  {
-    id: "best-innovator",
-    name: "Best Innovator",
-    nominees: [
-      { id: "bi-1", name: "Nominee One" },
-      { id: "bi-2", name: "Nominee Two" },
-      { id: "bi-3", name: "Nominee Three" },
-    ],
-  },
-  {
-    id: "person-of-the-year",
-    name: "Person of the Year",
-    nominees: [
-      { id: "py-1", name: "Nominee One" },
-      { id: "py-2", name: "Nominee Two" },
-      { id: "py-3", name: "Nominee Three" },
-    ],
-  },
-];
+  ["creative-of-the-year", "Creative of the Year", ["Amazing Donald", "Arinola Isaac", "Khushy"]],
+  ["committee-of-the-year", "Committee of the Year", ["Sports Committee", "Defence Committee", "Health Committee"]],
+  ["fresher-of-the-year", "Fresher of the Year", ["Dave", "Franky", "Sanzz Jnr"]],
+  ["politically-inclined-fresher", "Most Politically Inclined Fresher", ["Dave", "Iretomiwa Maforikan", "Ayandokun Edward"]],
+  ["fashionable-fresher", "Most Fashionable Fresher", ["Dave", "Nuren Abdullahi Opeyemi", "Dr Carbon"]],
+  ["staylite-of-the-year", "Staylite of the Year", ["Arinola Isaac", "Big Kenzo", "Yusuf Ibrahim Adeniyi"]],
+  ["clique-of-the-year", "Clique of the Year", ["AON / Awon Oloko Nla", "Top Floor Boyz", "D29 Boys"]],
+  ["politically-inclined-staylite", "Most Politically Inclined Staylite", ["Abiodun Gabriel", "Lawal Feranmi (Vortex)", "Big Kenzo"]],
+  ["fashionable-staylite", "Most Fashionable Staylite", ["Ariori Abdulmateen", "Ogunsanwo Oluwasinaayomi", "Rikash Design"]],
+  ["finalist-of-the-year", "Finalist of the Year", ["Olakulehin", "DOD", "Lasco"]],
+  ["politically-inclined-finalist", "Most Politically Inclined Finalist", ["Rhexx", "Olakulehin", "Lasco"]],
+  ["fashionable-finalist", "Most Fashionable Finalist", ["Oyelakin Emmanuel (YAGA)", "Donald Dominion (KHUSHY)", "Mr Who"]],
+  ["pressman-of-the-year", "Pressman of the Year", ["Unaji Levi Ugochukwu", "Michael", "Abiodun Awujoola"]],
+  ["public-speaker-of-the-year", "Public Speaker of the Year", ["David Onyeji", "Gordon", "Samuel Binuyo"]],
+  ["sportsman-of-the-year", "Sportsman of the Year", ["Mahrez", "Obinna", "Cartel"]],
+  ["executive-of-the-year", "Ransome Kuti Executive of the Year", ["Big Kenzo", "Lasco", "Mahreez"]],
+  ["elder-of-the-year", "Elder of the Year", ["Elder Oyelakin Emmanuel (Yaga)", "Elder Olakulehin", "Elder Lasco"]],
+  ["academically-inclined", "Most Academically Inclined", ["Habeeb", "KG", "Oni Oluwatomilayo"]],
+  ["entrepreneur-of-the-year", "Entrepreneur of the Year", ["YG COLLECTIVES", "Owolabi Freeman", "DesignPlusAfrica"]],
+  ["porter-of-the-year", "Porter of the Year", ["Porter Abbey", "Porter Fashina", "Porter Ogiaga"]],
+  ["honorable-of-the-year", "Honorable of the Year", ["Hon Dave", "Hon OJo", "Hon Ibrahim Yusuf, Dheniyi"]],
+  ["kutiress-of-the-year", "Kutiress of the Year", ["His Favourite Girl", "Olabisi", "Testimony"]],
+].map(([id, name, nominees]) => ({
+  id,
+  name,
+  nominees: nominees.map((nominee, index) => ({ id: `${id}-${index + 1}`, name: nominee })),
+}));

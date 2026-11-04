@@ -1,72 +1,219 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer">
-<title>Vote</title>
-<!-- Reference page: shows exactly how to talk to the API. Replace the markup/styling with your own design. -->
-<!-- Optional Turnstile: uncomment and set your site key
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Ransome Kuti Awards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+  <style>
+    :root { --gold: #dfca8a; --cream: #f1e7df; --wine: #4a0e17; --dark: #10070d; }
+    * { box-sizing: border-box; }
+    html { scrollbar-width: none; }
+    html::-webkit-scrollbar { display: none; }
+    body { min-width: 320px; min-height: 100vh; margin: 0; color: var(--cream); background: var(--dark); font-family: Manrope, sans-serif; }
+    body::before { content: ""; position: fixed; inset: 0; z-index: -2; background: linear-gradient(90deg, rgba(13, 7, 14, .8), rgba(13, 7, 14, .38)), url("screen.png") center / cover; }
+    body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 50% 30%, transparent 12%, rgba(7, 3, 8, .34) 68%, rgba(4, 2, 5, .76)); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .42; }
+    .shell { width: min(100%, 980px); min-height: 100vh; margin: 0 auto; padding: 34px 22px 64px; }
+    .screen { display: none; }
+    .screen.is-visible { display: block; }
+    .access { display: grid; min-height: calc(100vh - 98px); place-items: center; text-align: center; }
+    .access-inner { width: min(100%, 430px); }
+    .eyebrow, .kicker { margin: 0 0 12px; color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+    h1, h2, h3 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; }
+    h1 { margin: 0; font: 400 clamp(48px, 12vw, 78px)/.9 Newsreader, Georgia, serif; }
+    h1 em { display: block; color: var(--gold); font-size: .64em; }
+    .lead { color: var(--cream); font-size: 15px; line-height: 1.65; }
+    .access-form { display: grid; gap: 12px; margin-top: 30px; }
+    input { width: 100%; padding: 15px 16px; border: 1px solid rgba(223, 202, 138, .62); color: var(--cream); background: rgba(15, 7, 13, .32); outline: none; }
+    input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(223, 202, 138, .14); }
+    .primary, .secondary { padding: 14px 18px; border: 1px solid var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .primary { color: #241a00; background: var(--gold); }
+    .secondary { color: var(--gold); background: transparent; }
+    .primary:hover, .primary:focus-visible { background: #fff3c8; }
+    .secondary:hover, .secondary:focus-visible { color: #241a00; background: var(--gold); }
+    .message { min-height: 22px; margin: 14px 0 0; color: var(--gold); font-size: 12px; }
+    .topline { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+    .back { padding: 0; border: 0; color: var(--gold); background: transparent; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .heading { max-width: 720px; margin: 48px 0 28px; }
+    h2 { margin: 0; color: var(--cream); font-size: clamp(48px, 9vw, 82px); line-height: .9; }
+    .heading p { max-width: 58ch; margin: 18px 0 0; font-size: 15px; line-height: 1.65; }
+    .progress { margin: 22px 0 34px; }
+    .progress-meta { display: flex; justify-content: space-between; color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .track { height: 6px; margin-top: 10px; overflow: hidden; background: rgba(241, 231, 223, .18); }
+    .value { width: 0; height: 100%; background: var(--gold); transition: width .3s ease; }
+    .category-list { display: grid; }
+    .category { display: grid; grid-template-columns: 48px 1fr auto; gap: 14px; align-items: center; padding: 18px 0; border: 0; color: inherit; background: transparent; text-align: left; }
+    .category:hover, .category:focus-visible { background: rgba(74, 14, 23, .42); outline: none; transform: translateX(5px); }
+    .number { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+    .category h3 { margin: 0; font-size: clamp(27px, 5vw, 46px); line-height: .96; }
+    .category small { display: block; margin-top: 6px; color: #d7c6c2; font-size: 12px; }
+    .category-arrow { color: var(--gold); font-size: 22px; }
+    .check { display: block; margin-top: 7px; color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .nominee-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .nominee { text-align: center; }
+    .portrait { display: grid; place-items: end center; height: 250px; overflow: hidden; border: 1px solid rgba(223, 202, 138, .42); background: linear-gradient(145deg, rgba(74, 14, 23, .86), rgba(20, 7, 12, .7)); }
+    .portrait:hover, .portrait:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+    .portrait svg { width: 88%; height: 94%; }
+    .rank { display: block; margin: 15px 0 5px; color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .nominee h3 { margin: 0; font-size: 26px; line-height: 1; }
+    .nominee .primary { margin-top: 12px; padding: 10px 12px; }
+    .nominee .primary.is-selected { color: #241a00; background: var(--gold); }
+    .actions { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-top: 36px; }
+    .status { min-height: 22px; color: var(--gold); font-size: 12px; text-align: center; }
+    .thank-you { min-height: calc(100vh - 98px); display: grid; place-content: center; text-align: center; }
+    .thank-you h2 { max-width: 720px; }
+    .thank-you .kicker { margin-top: 20px; }
+    @media (max-width: 650px) {
+      .shell { padding: 24px 18px 48px; }
+      .access { min-height: calc(100vh - 72px); }
+      .nominee-grid { grid-template-columns: 1fr; gap: 30px; }
+      .portrait { height: 280px; }
+      .actions { align-items: stretch; }
+      .actions .secondary, .actions .primary { flex: 1; }
+    }
+  </style>
 </head>
 <body>
-<div id="app">Loading…</div>
-<script>
-const app = document.getElementById("app");
-const TURNSTILE_SITEKEY = ""; // optional
-const url = new URL(location.href);
-let token = url.searchParams.get("t") || sessionStorage.getItem("t");
-if (token) { sessionStorage.setItem("t", token); history.replaceState({}, "", location.pathname); } // hide token from the address bar
-let email = sessionStorage.getItem("e") || "";
+  <main class="shell">
+    <section class="screen access is-visible" id="access-screen">
+      <div class="access-inner">
+        <p class="eyebrow">Hall of Honour · Ransome Kuti Awards</p>
+        <h1>Enter the <em>chambers.</em></h1>
+        <p class="lead">Your private voting link is ready. Enter the email address this link was sent to continue.</p>
+        <form class="access-form" id="email-form">
+          <input id="email" type="email" autocomplete="email" placeholder="Your email address" required>
+          <button class="primary" type="submit">Open ballot →</button>
+        </form>
+        <p class="message" id="access-message" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+    <section class="screen" id="categories-screen">
+      <div class="topline"><p class="kicker">The ballot awaits</p><button class="back" id="sign-out" type="button">Exit ballot</button></div>
+      <header class="heading"><h2>Choose what to honour.</h2><p>Move through each category with intention. Every selection is a small record of the people who make this community matter.</p></header>
+      <div class="progress" aria-label="Voting progress"><div class="progress-meta"><span id="category-progress">0 of 22 categories voted</span><span id="category-percent">0%</span></div><div class="track"><div class="value" id="category-value"></div></div></div>
+      <div class="category-list" id="category-list"></div>
+    </section>
+    <section class="screen" id="nominees-screen">
+      <button class="back" id="nominees-back" type="button">← Back to categories</button>
+      <header class="heading"><p class="kicker">The nominees</p><h2 id="nominee-title"></h2><p>Three names. One vote. Select the person whose contribution stands out to you.</p></header>
+      <div class="progress" aria-label="Voting progress"><div class="progress-meta"><span id="nominee-progress">0 of 22 categories voted</span><span id="nominee-percent">0%</span></div><div class="track"><div class="value" id="nominee-value"></div></div></div>
+      <div class="nominee-grid" id="nominee-grid"></div>
+      <p class="status" id="nominee-status" role="status" aria-live="polite"></p>
+      <div class="actions"><button class="secondary" id="previous" type="button">← Previous</button><button class="primary" id="continue" type="button">Continue voting →</button></div>
+    </section>
+    <section class="screen thank-you" id="thank-you-screen">
+      <div><p class="kicker">Ransome Kuti Awards</p><h2>Thank you for voting.</h2><p class="kicker">Akoni ti dé.</p><p>Amin.</p><button class="secondary" id="home" type="button">Back to home</button></div>
+    </section>
+  </main>
+  <script>
+    const screens = {
+      access: document.querySelector("#access-screen"),
+      categories: document.querySelector("#categories-screen"),
+      nominees: document.querySelector("#nominees-screen"),
+      thankYou: document.querySelector("#thank-you-screen"),
+    };
+    const emailForm = document.querySelector("#email-form");
+    const emailInput = document.querySelector("#email");
+    const accessMessage = document.querySelector("#access-message");
+    const categoryList = document.querySelector("#category-list");
+    const nomineeGrid = document.querySelector("#nominee-grid");
+    const nomineeTitle = document.querySelector("#nominee-title");
+    const nomineeStatus = document.querySelector("#nominee-status");
+    const continueButton = document.querySelector("#continue");
+    const previousButton = document.querySelector("#previous");
+    const session = { token: new URL(location.href).searchParams.get("t") || sessionStorage.getItem("t") || "", email: sessionStorage.getItem("e") || "", categories: [], voted: new Set(), active: 0 };
+    if (session.token) { sessionStorage.setItem("t", session.token); history.replaceState({}, "", location.pathname); }
 
-const api = (path, body) =>
-  fetch("/api/" + path, { method: "POST", body: JSON.stringify(body) }).then(async (r) => ({ status: r.status, data: await r.json() }));
-
-const msg = (t) => (app.textContent = t);
-
-async function start() {
-  if (!token) return msg("This voting link is missing or invalid. Please use the link from your email.");
-  const { status, data } = await api("session", { token, email: email || undefined });
-  if (data.error === "invalid_link") return msg("This voting link is not valid.");
-  if (data.error === "email_mismatch") { sessionStorage.removeItem("e"); email = ""; return askEmail("That email doesn't match this link."); }
-  if (data.step === "email") return askEmail();
-  if (data.state === "not_open") return msg("Voting has not opened yet.");
-  if (data.state === "closed") return msg("Voting has closed.");
-  render(data);
-}
-
-function askEmail(note = "") {
-  app.innerHTML = `<p>${note}</p><p>Enter the email address this link was sent to:</p>
-    <input id="em" type="email" autocomplete="email"><button id="go">Continue</button>`;
-  document.getElementById("go").onclick = () => {
-    email = document.getElementById("em").value.trim();
-    sessionStorage.setItem("e", email);
+    const api = async (path, body) => {
+      const response = await fetch(`/api/${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      return { status: response.status, data: await response.json().catch(() => ({})) };
+    };
+    const show = (name) => Object.entries(screens).forEach(([key, screen]) => screen.classList.toggle("is-visible", key === name));
+    const message = (element, text) => { element.textContent = text; };
+    const escapeHtml = (value) => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
+    const portrait = (index, feminine) => {
+      const skin = feminine ? "#b9795d" : ["#a8644f", "#c68161", "#8e4e40"][index];
+      const shirt = ["#6b1828", "#332033", "#75602e"][index];
+      return `<svg viewBox="0 0 180 230" role="img" aria-label="Illustrated nominee portrait"><path d="M25 230c4-48 24-70 65-70s61 22 65 70" fill="${shirt}"/><path d="M73 151h34l10 34H63z" fill="${skin}"/><ellipse cx="90" cy="104" rx="43" ry="53" fill="${skin}"/><path d="M47 102c-4-48 18-75 45-75 33 0 47 28 41 74-11-18-24-25-43-25-19 0-30 9-43 26Z" fill="#171016"/><circle cx="74" cy="105" r="4" fill="#171016"/><circle cx="106" cy="105" r="4" fill="#171016"/><path d="M79 132c8 5 16 5 24 0" fill="none" stroke="#542d2b" stroke-width="3" stroke-linecap="round"/></svg>`;
+    };
+    const updateProgress = () => {
+      const count = session.voted.size;
+      const percent = Math.round((count / session.categories.length) * 100);
+      document.querySelector("#category-progress").textContent = `${count} of ${session.categories.length} categories voted`;
+      document.querySelector("#category-percent").textContent = `${percent}%`;
+      document.querySelector("#category-value").style.width = `${percent}%`;
+      document.querySelector("#nominee-progress").textContent = `${count} of ${session.categories.length} categories voted`;
+      document.querySelector("#nominee-percent").textContent = `${percent}%`;
+      document.querySelector("#nominee-value").style.width = `${percent}%`;
+    };
+    const renderCategories = () => {
+      categoryList.innerHTML = session.categories.map((category, index) => `<button class="category" type="button" data-index="${index}"><span class="number">${String(index + 1).padStart(2, "0")}</span><span><h3>${escapeHtml(category.name)}</h3>${session.voted.has(category.id) ? '<span class="check">✓ Voted</span>' : ""}</span><span class="category-arrow">↗</span></button>`).join("");
+      categoryList.querySelectorAll(".category").forEach((button) => button.addEventListener("click", () => openNominees(Number(button.dataset.index))));
+    };
+    const openNominees = (index) => {
+      session.active = index;
+      const category = session.categories[index];
+      nomineeTitle.textContent = category.name;
+      nomineeStatus.textContent = "";
+      const feminine = category.id === "kutiress-of-the-year";
+      nomineeGrid.innerHTML = category.nominees.map((nominee, nomineeIndex) => `<article class="nominee"><button class="portrait" type="button" data-id="${nominee.id}" aria-label="Vote for ${escapeHtml(nominee.name)}">${portrait(nomineeIndex, feminine)}</button><span class="rank">${["First choice", "Second choice", "Third choice"][nomineeIndex]}</span><h3>${escapeHtml(nominee.name)}</h3></article>`).join("");
+      nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => choice.addEventListener("click", () => castVote(category, choice.dataset.id)));
+      previousButton.disabled = index === 0;
+      continueButton.textContent = session.voted.has(category.id) ? (session.voted.size === session.categories.length ? "Finish ballot →" : "Next category →") : "Choose a nominee";
+      show("nominees");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    const castVote = async (category, nomineeId) => {
+      if (session.voted.has(category.id)) return;
+      nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => { choice.disabled = true; });
+      message(nomineeStatus, "Recording your vote…");
+      const result = await api("vote", { token: session.token, email: session.email || undefined, votes: { [category.id]: nomineeId } });
+      if (result.status !== 200) {
+        nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => { choice.disabled = false; });
+        const errors = { already_voted: "This category has already been recorded.", closed: "Voting has closed.", not_open: "Voting has not opened yet.", invalid_link: "This voting link is no longer valid.", email_mismatch: "That email does not match this voting link.", captcha_failed: "Please complete the security check." };
+        message(nomineeStatus, errors[result.data.error] || "We could not record that vote. Please try again.");
+        return;
+      }
+      session.voted = new Set(result.data.votedCategories);
+      updateProgress();
+      renderCategories();
+      message(nomineeStatus, "Vote recorded.");
+      if (result.data.allVoted) { continueButton.textContent = "Finish ballot →"; return; }
+      const next = session.categories.findIndex((item, index) => index > session.active && !session.voted.has(item.id));
+      window.setTimeout(() => openNominees(next >= 0 ? next : session.categories.findIndex((item) => !session.voted.has(item.id))), 500);
+    };
+    const start = async () => {
+      if (!session.token) { message(accessMessage, "Open the private voting link from your email."); return; }
+      if (!session.email) { emailInput.focus(); return; }
+      const result = await api("session", { token: session.token, email: session.email });
+      if (result.data.error === "email_mismatch") { sessionStorage.removeItem("e"); session.email = ""; message(accessMessage, "That email does not match this voting link."); return; }
+      if (result.data.error === "invalid_link") { message(accessMessage, "This voting link is invalid."); return; }
+      if (result.data.state === "not_open") { message(accessMessage, "Voting has not opened yet."); return; }
+      if (result.data.state === "closed") { message(accessMessage, "Voting has closed."); return; }
+      session.categories = result.data.categories;
+      session.voted = new Set(result.data.votedCategories);
+      updateProgress();
+      renderCategories();
+      show("categories");
+    };
+    emailForm.addEventListener("submit", (event) => { event.preventDefault(); session.email = emailInput.value.trim(); sessionStorage.setItem("e", session.email); start(); });
+    document.querySelector("#sign-out").addEventListener("click", () => { sessionStorage.clear(); location.reload(); });
+    document.querySelector("#nominees-back").addEventListener("click", () => { renderCategories(); show("categories"); });
+    previousButton.addEventListener("click", () => openNominees(session.active - 1));
+    continueButton.addEventListener("click", () => {
+      if (session.voted.size === session.categories.length) { show("thankYou"); return; }
+      const next = session.categories.findIndex((category) => !session.voted.has(category.id));
+      if (next >= 0) openNominees(next);
+    });
+    document.querySelector("#home").addEventListener("click", () => { sessionStorage.clear(); location.href = location.pathname; });
+    if (session.email) emailInput.value = session.email;
     start();
-  };
-}
-
-function render(s) {
-  if (s.allVoted) return msg("Thank you! Your votes have been recorded.");
-  const open = s.categories.filter((c) => !s.votedCategories.includes(c.id));
-  app.innerHTML = open.map((c) => `<fieldset><legend>${c.name}</legend>` +
-    c.nominees.map((n) => `<label><input type="radio" name="${c.id}" value="${n.id}"> ${n.name}</label><br>`).join("") +
-    `</fieldset>`).join("") + `<div class="cf-turnstile" data-sitekey="${TURNSTILE_SITEKEY}"></div><button id="submit">Submit votes</button><p id="err"></p>`;
-  document.getElementById("submit").onclick = submit;
-}
-
-async function submit() {
-  const votes = {};
-  app.querySelectorAll("input[type=radio]:checked").forEach((i) => (votes[i.name] = i.value));
-  if (!Object.keys(votes).length) return (document.getElementById("err").textContent = "Pick at least one nominee.");
-  const btn = document.getElementById("submit"); btn.disabled = true; // prevents double-clicks
-  const ts = app.querySelector("[name=cf-turnstile-response]");
-  const { status, data } = await api("vote", { token, email: email || undefined, votes, turnstile: ts ? ts.value : undefined });
-  if (status === 200) return data.allVoted ? msg("Thank you! Your votes have been recorded.") : start();
-  btn.disabled = false;
-  const errs = { already_voted: "You've already voted in that category.", captcha_failed: "Please complete the captcha.", closed: "Voting has closed.", not_open: "Voting has not opened yet.", server_error: "Something went wrong, please try again." };
-  document.getElementById("err").textContent = errs[data.error] || "Could not submit your vote.";
-}
-start();
-</script>
+  </script>
 </body>
 </html>

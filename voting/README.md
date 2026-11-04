@@ -49,7 +49,11 @@ Do not re-run the script for the same list (it would invalidate links already se
 
 `GET /api/results` header `x-admin-key: <ADMIN_KEY>` -> turnout + tally. Never call from the public page.
 
-`public/index.html` is a bare working reference of the full flow; copy its fetch logic into your design.
+`public/index.html` is the production frontend for the voting flow. The root repository
+`../index.html` remains the visual prototype/reference; keep the two separate when iterating.
+The production frontend reads categories from `/api/session`, records each selected category
+through `/api/vote`, preserves the email-link token in session storage, and advances to the next
+unvoted category after a successful vote.
 Keep the token out of the address bar (the reference page strips it) and send `Referrer-Policy: no-referrer`.
 
 ## Tested
