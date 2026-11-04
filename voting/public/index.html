@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Vote</title>
+<!-- Reference page: shows exactly how to talk to the API. Replace the markup/styling with your own design. -->
+<!-- Optional Turnstile: uncomment and set your site key
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
+</head>
+<body>
+<div id="app">Loading…</div>
+<script>
+const app = document.getElementById("app");
+const TURNSTILE_SITEKEY = ""; // optional
+const url = new URL(location.href);
+let token = url.searchParams.get("t") || sessionStorage.getItem("t");
+if (token) { sessionStorage.setItem("t", token); history.replaceState({}, "", location.pathname); } // hide token from the address bar
+let email = sessionStorage.getItem("e") || "";
+
+const api = (path, body) =>
+  fetch("/api/" + path, { method: "POST", body: JSON.stringify(body) }).then(async (r) => ({ status: r.status, data: await r.json() }));
+
+const msg = (t) => (app.textContent = t);
+
+async function start() {
+  if (!token) return msg("This voting link is missing or invalid. Please use the link from your email.");
+  const { status, data } = await api("session", { token, email: email || undefined });
+  if (data.error === "invalid_link") return msg("This voting link is not valid.");
+  if (data.error === "email_mismatch") { sessionStorage.removeItem("e"); email = ""; return askEmail("That email doesn't match this link."); }
+  if (data.step === "email") return askEmail();
+  if (data.state === "not_open") return msg("Voting has not opened yet.");
+  if (data.state === "closed") return msg("Voting has closed.");
+  render(data);
+}
+
+function askEmail(note = "") {
+  app.innerHTML = `<p>${note}</p><p>Enter the email address this link was sent to:</p>
+    <input id="em" type="email" autocomplete="email"><button id="go">Continue</button>`;
+  document.getElementById("go").onclick = () => {
+    email = document.getElementById("em").value.trim();
+    sessionStorage.setItem("e", email);
+    start();
+  };
+}
+
+function render(s) {
+  if (s.allVoted) return msg("Thank you! Your votes have been recorded.");
+  const open = s.categories.filter((c) => !s.votedCategories.includes(c.id));
+  app.innerHTML = open.map((c) => `<fieldset><legend>${c.name}</legend>` +
+    c.nominees.map((n) => `<label><input type="radio" name="${c.id}" value="${n.id}"> ${n.name}</label><br>`).join("") +
+    `</fieldset>`).join("") + `<div class="cf-turnstile" data-sitekey="${TURNSTILE_SITEKEY}"></div><button id="submit">Submit votes</button><p id="err"></p>`;
+  document.getElementById("submit").onclick = submit;
+}
+
+async function submit() {
+  const votes = {};
+  app.querySelectorAll("input[type=radio]:checked").forEach((i) => (votes[i.name] = i.value));
+  if (!Object.keys(votes).length) return (document.getElementById("err").textContent = "Pick at least one nominee.");
+  const btn = document.getElementById("submit"); btn.disabled = true; // prevents double-clicks
+  const ts = app.querySelector("[name=cf-turnstile-response]");
+  const { status, data } = await api("vote", { token, email: email || undefined, votes, turnstile: ts ? ts.value : undefined });
+  if (status === 200) return data.allVoted ? msg("Thank you! Your votes have been recorded.") : start();
+  btn.disabled = false;
+  const errs = { already_voted: "You've already voted in that category.", captcha_failed: "Please complete the captcha.", closed: "Voting has closed.", not_open: "Voting has not opened yet.", server_error: "Something went wrong, please try again." };
+  document.getElementById("err").textContent = errs[data.error] || "Could not submit your vote.";
+}
+start();
+</script>
+</body>
+</html>

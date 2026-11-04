@@ -1,0 +1,1332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ransome Kuti Awards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #e6e1e4;
+      --muted: #a39e98;
+      --ghost: #71696a;
+      --wine: #4a0e17;
+      --wine-bright: #650f1b;
+      --gold: #d4af37;
+      --panel: rgba(15, 13, 16, .91);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scrollbar-width: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background: #100b10;
+      font-family: Manrope, Arial, sans-serif;
+    }
+
+    .page {
+      min-height: 100svh;
+      display: grid;
+      place-items: start center;
+      padding: 0 20px;
+      position: relative;
+      isolation: isolate;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background:
+        linear-gradient(90deg, rgba(13, 7, 14, .22), rgba(13, 7, 14, .03) 54%, rgba(12, 5, 9, .38)),
+        linear-gradient(180deg, rgba(20, 7, 15, .28), rgba(10, 5, 10, .58));
+    }
+
+    .page-background {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      image-rendering: auto;
+      pointer-events: none;
+    }
+
+    .page::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at 34% 35%, rgba(8, 3, 9, .58) 0%, rgba(8, 3, 9, .28) 32%, transparent 58%),
+        radial-gradient(circle at 50% 30%, transparent 12%, rgba(7, 3, 8, .34) 68%, rgba(4, 2, 5, .7)),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 5px);
+      mix-blend-mode: multiply;
+    }
+
+    .access-card {
+      width: min(100%, 360px);
+      margin-top: clamp(130px, 21svh, 245px);
+      padding: 0 0 28px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #dfca8a;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .22em;
+      text-shadow: 0 2px 8px #170b0d, 0 0 2px #170b0d;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: #f1e7df;
+      font-family: Newsreader, Georgia, serif;
+      font-size: clamp(38px, 11vw, 48px);
+      font-weight: 400;
+      letter-spacing: -.035em;
+      line-height: .96;
+      text-shadow: 0 3px 14px #050206, 0 0 4px #050206;
+    }
+
+    h1 em {
+      display: block;
+      color: #f0d9ce;
+      font-size: .73em;
+      font-style: italic;
+      letter-spacing: -.01em;
+      line-height: 1.12;
+      text-shadow: 0 3px 14px #050206, 0 0 4px #050206;
+    }
+
+    .intro {
+      max-width: 290px;
+      margin: 12px auto 58px;
+      color: #f1e7df;
+      font-weight: 600;
+      font-size: 13px;
+      line-height: 1.55;
+      text-shadow: 0 2px 10px #050206, 0 0 4px #050206;
+    }
+
+    .token-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      color: #f2dfd9;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .16em;
+      text-align: left;
+      text-shadow: 0 2px 7px #10070a, 0 0 2px #10070a;
+      text-transform: uppercase;
+    }
+
+    .token-label span:last-child {
+      color: #dfcfc9;
+      font-size: 9px;
+      letter-spacing: .08em;
+      text-shadow: 0 2px 6px #10070a;
+      text-transform: none;
+    }
+
+    .token-cue {
+      display: block;
+      width: 48px;
+      height: 58px;
+      margin: 0 auto -4px;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .token-cue path {
+      fill: none;
+      stroke: #dfca8a;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.6;
+    }
+
+    .token-cue circle {
+      fill: none;
+      stroke: #dfca8a;
+      stroke-width: 1.2;
+    }
+
+    .token-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 53px;
+      padding: 0 15px;
+      background: transparent;
+      border-bottom: 1px solid rgba(242, 223, 217, .58);
+      transition: border-color .2s ease;
+    }
+
+    #access-form {
+      margin-top: clamp(48px, 9vh, 75px);
+    }
+
+    .token-wrap:focus-within {
+      border-color: #dfca8a;
+    }
+
+    .token-wrap input {
+      min-width: 0;
+      flex: 1;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font: 600 16px Manrope, sans-serif;
+      letter-spacing: .28em;
+      text-shadow: 0 2px 7px #10070a;
+      text-transform: uppercase;
+    }
+
+    .token-wrap input::placeholder {
+      color: #f0e2dc;
+      opacity: .8;
+    }
+
+    .token-icon {
+      color: #ead9a5;
+      font-size: 15px;
+      text-shadow: 0 2px 7px #10070a;
+    }
+
+    .helper-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 9px 2px 24px;
+      color: #d9c8c3;
+      font-size: 10px;
+      font-weight: 600;
+      text-shadow: 0 2px 6px #10070a;
+    }
+
+    .helper-row button {
+      padding: 0;
+      border: 0;
+      color: #f0e2dc;
+      background: none;
+      font: inherit;
+      text-shadow: 0 2px 6px #10070a;
+      cursor: pointer;
+    }
+
+    .submit {
+      width: 100%;
+      min-height: 49px;
+      border: 0;
+      border-radius: 4px;
+      color: #ead9a5;
+      background: linear-gradient(100deg, #5a0e19, #4a0e17);
+      font: 700 12px Manrope, sans-serif;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, color .18s ease;
+    }
+
+    .submit:hover, .submit:focus-visible {
+      background: linear-gradient(100deg, var(--wine-bright), #64121d);
+      color: #fff0b5;
+      transform: translateY(-1px);
+    }
+
+    .status {
+      min-height: 20px;
+      margin: 13px 0 0;
+      color: #dfca8a;
+      font-size: 11px;
+      font-weight: 700;
+      text-shadow: 0 2px 7px #10070a;
+    }
+
+    .footer {
+      margin: 70px 0 0;
+      color: #d7c6c2;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.8;
+      text-shadow: 0 2px 7px #10070a, 0 0 2px #10070a;
+    }
+
+    .footer strong {
+      color: #f0d9ce;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .page-two {
+      display: none;
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: 48px 24px 72px;
+      color: #e6e1e4;
+      font-family: Manrope, Arial, sans-serif;
+    }
+
+    .page-two.is-visible {
+      display: block;
+    }
+
+    .page-two-header {
+      max-width: 700px;
+      margin-bottom: 36px;
+    }
+
+    .page-two-kicker {
+      margin: 0 0 12px;
+      color: #dfca8a;
+      font: 700 11px Manrope, sans-serif;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .page-two h2 {
+      margin: 0;
+      color: #f1e7df;
+      font: 600 clamp(46px, 8vw, 78px)/.94 "Cormorant Garamond", Georgia, serif;
+      letter-spacing: -.035em;
+    }
+
+    .page-two-lead {
+      max-width: 600px;
+      margin: 20px 0 0;
+      color: #f1e7df;
+      font: 500 16px/1.7 Manrope, sans-serif;
+    }
+
+    .story-staircase {
+      position: relative;
+      display: grid;
+      gap: 0;
+      min-height: 920px;
+      margin-top: 8px;
+      padding: 8px 0 70px;
+      isolation: isolate;
+    }
+
+    .staircase-art {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -24px;
+      z-index: 0;
+      width: 160px;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+      opacity: .9;
+    }
+
+    .staircase-art path,
+    .staircase-art line,
+    .staircase-art polygon,
+    .staircase-art ellipse {
+      fill: none;
+      stroke: #dfca8a;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .staircase-art .rail {
+      stroke-width: 2.2;
+      filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .45));
+    }
+
+    .staircase-art .depth {
+      stroke-width: 1.2;
+      opacity: .62;
+    }
+
+    .staircase-art .step-line {
+      stroke-width: 1.35;
+      opacity: .86;
+    }
+
+    .staircase-art .post {
+      stroke-width: 1.4;
+      opacity: .9;
+    }
+
+    .staircase-art .landing {
+      fill: rgba(15, 7, 12, .16);
+      stroke-width: 1.15;
+      opacity: .86;
+    }
+
+    .staircase-art .glint {
+      stroke: #f3e5b6;
+      stroke-width: 1;
+      opacity: .7;
+    }
+
+    .story-step {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 660px);
+      min-height: 205px;
+      padding: 26px 28px 30px 76px;
+      background: transparent;
+      border-left: 1px solid rgba(223, 202, 138, .62);
+      transform: translateX(8%);
+    }
+
+    .story-step::before {
+      content: "";
+      position: absolute;
+      top: 28px;
+      left: -5px;
+      width: 9px;
+      height: 9px;
+      border: 1px solid #dfca8a;
+      border-radius: 50%;
+      background: #160b12;
+      box-shadow: 0 0 0 5px rgba(22, 11, 18, .42), 0 0 14px rgba(223, 202, 138, .38);
+    }
+
+    .story-step:nth-of-type(2) {
+      margin-top: 18px;
+      transform: translateX(18%);
+    }
+
+    .story-step:nth-of-type(3) {
+      margin-top: 18px;
+      transform: translateX(28%);
+    }
+
+    .story-step:nth-of-type(4) {
+      margin-top: 18px;
+      transform: translateX(38%);
+    }
+
+    .story-step span {
+      display: block;
+      margin-bottom: 12px;
+      color: #dfca8a;
+      font: 700 11px Manrope, sans-serif;
+      letter-spacing: .16em;
+      text-shadow: 0 2px 8px #050206, 0 0 3px #050206;
+    }
+
+    .story-step h3 {
+      max-width: 13ch;
+      margin: 0 0 10px;
+      color: #f1e7df;
+      font: 600 clamp(38px, 6vw, 58px)/.94 "Cormorant Garamond", Georgia, serif;
+      letter-spacing: -.025em;
+      text-wrap: balance;
+      text-shadow: 0 3px 12px #050206, 0 0 3px #050206;
+    }
+
+    .story-step p {
+      max-width: 42ch;
+      margin: 0;
+      color: #f1e7df;
+      font: 600 15px/1.55 Manrope, sans-serif;
+      text-wrap: pretty;
+      text-shadow: 0 2px 9px #050206, 0 0 3px #050206;
+    }
+
+    .categories-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 18px;
+      margin: 32px 0 0 clamp(58px, 12vw, 180px);
+      padding: 15px 20px;
+      border: 1px solid #6b1828;
+      color: #dfca8a;
+      background: #4a0e17;
+      font: 700 11px Manrope, sans-serif;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s ease, color .2s ease, transform .2s ease;
+    }
+
+    .categories-cta:hover,
+    .categories-cta:focus-visible {
+      color: #fff3c8;
+      background: #651421;
+      transform: translateX(4px);
+    }
+
+    .page-three {
+      display: none;
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: 48px 24px 72px;
+    }
+
+    .page-three.is-visible { display: block; }
+
+    .category-intro {
+      max-width: 650px;
+      margin-bottom: 42px;
+    }
+
+    .category-intro h2 {
+      margin: 0;
+      color: #f1e7df;
+      font: 600 clamp(46px, 8vw, 78px)/.94 "Cormorant Garamond", Georgia, serif;
+    }
+
+    .category-intro p {
+      max-width: 54ch;
+      color: #f1e7df;
+      font: 600 15px/1.65 Manrope, sans-serif;
+    }
+
+    .voting-progress {
+      margin: 24px 0 36px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      color: #dfca8a;
+      font: 700 10px Manrope, sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .progress-track {
+      height: 7px;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(230, 225, 228, .18);
+    }
+
+    .progress-value {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: #dfca8a;
+      transition: width .3s ease;
+    }
+
+    .category-list {
+      display: grid;
+      gap: 0;
+    }
+
+    .category-item {
+      display: grid;
+      grid-template-columns: 58px 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 22px 0;
+      border-radius: 6px;
+      transition: background .2s ease, transform .2s ease;
+      cursor: pointer;
+    }
+
+    .category-item:hover,
+    .category-item:focus-within {
+      background: rgba(74, 14, 23, .42);
+      transform: translateX(6px);
+    }
+
+    .category-number {
+      color: #dfca8a;
+      font: 700 12px Manrope, sans-serif;
+      letter-spacing: .12em;
+    }
+
+    .category-item h3 {
+      margin: 0;
+      color: #f1e7df;
+      font: 500 clamp(28px, 5vw, 48px)/1 "Cormorant Garamond", Georgia, serif;
+    }
+
+    .category-item p {
+      margin: 5px 0 0;
+      color: #d7c6c2;
+      font: 500 13px/1.5 Manrope, sans-serif;
+    }
+
+    .category-arrow {
+      color: #dfca8a;
+      font-size: 24px;
+    }
+
+    .category-check {
+      display: none;
+      margin-top: 8px;
+      color: #dfca8a;
+      font: 700 10px Manrope, sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .category-item.is-voted .category-check { display: block; }
+    .category-item.is-voted .category-arrow { color: #dfca8a; }
+
+    .page-four {
+      display: none;
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: 48px 24px 72px;
+    }
+
+    .page-four.is-visible { display: block; }
+
+    .nominee-back {
+      padding: 0;
+      border: 0;
+      color: #dfca8a;
+      background: transparent;
+      font: 700 11px Manrope, sans-serif;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .nominee-heading {
+      max-width: 720px;
+      margin: 42px 0 34px;
+    }
+
+    .nominee-progress {
+      max-width: 720px;
+      margin: 0 0 34px;
+    }
+
+    .nominee-heading h2 {
+      margin: 0;
+      color: #f1e7df;
+      font: 600 clamp(46px, 8vw, 78px)/.94 "Cormorant Garamond", Georgia, serif;
+    }
+
+    .nominee-heading p {
+      max-width: 54ch;
+      margin: 18px 0 0;
+      color: #f1e7df;
+      font: 600 15px/1.65 Manrope, sans-serif;
+    }
+
+    .nominee-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .nominee {
+      min-width: 0;
+      text-align: center;
+    }
+
+    .portrait-frame {
+      position: relative;
+      display: grid;
+      place-items: end center;
+      height: 245px;
+      overflow: hidden;
+      background: linear-gradient(145deg, rgba(74, 14, 23, .86), rgba(20, 7, 12, .7));
+      border-radius: 6px;
+    }
+
+    .portrait-frame::after {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(223, 202, 138, .42);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .portrait-frame svg {
+      width: 88%;
+      height: 94%;
+    }
+
+    .nominee-rank {
+      display: block;
+      margin: 16px 0 5px;
+      color: #dfca8a;
+      font: 700 10px Manrope, sans-serif;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .nominee h3 {
+      margin: 0;
+      color: #f1e7df;
+      font: 600 25px/1.05 "Cormorant Garamond", Georgia, serif;
+    }
+
+    .nominee-vote {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 3px;
+      color: #dfca8a;
+      background: #4a0e17;
+      font: 700 10px Manrope, sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .nominee-vote:hover,
+    .nominee-vote:focus-visible {
+      background: #651421;
+      color: #fff3c8;
+    }
+
+    .nominee-vote.is-selected {
+      color: #241a00;
+      background: #dfca8a;
+    }
+
+    .nominee-confirmation {
+      min-height: 24px;
+      margin: 18px 0 0;
+      color: #dfca8a;
+      font: 700 12px Manrope, sans-serif;
+      text-align: center;
+    }
+
+    .nominee-navigation {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 36px;
+    }
+
+    .nominee-navigation button {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 132px;
+      padding: 8px 0;
+      border: 0;
+      color: #dfca8a;
+      background: transparent;
+      font: 700 10px Manrope, sans-serif;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .nominee-navigation button:last-child {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    .nominee-navigation svg {
+      width: 52px;
+      height: 18px;
+      flex: 0 0 auto;
+      overflow: visible;
+    }
+
+    .nominee-navigation svg line,
+    .nominee-navigation svg path {
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.5;
+    }
+
+    .nominee-navigation button:hover,
+    .nominee-navigation button:focus-visible {
+      color: #fff3c8;
+      outline: none;
+    }
+
+    .nominee-navigation button:focus-visible {
+      text-decoration: underline;
+      text-underline-offset: 5px;
+    }
+
+    .nominee-navigation button:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .submit-vote {
+      display: block;
+      margin: 30px auto 0;
+      padding: 14px 22px;
+      border: 1px solid #dfca8a;
+      color: #241a00;
+      background: #dfca8a;
+      font: 700 11px Manrope, sans-serif;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .submit-vote:disabled {
+      color: rgba(241, 231, 223, .42);
+      background: transparent;
+      border-color: rgba(223, 202, 138, .35);
+      cursor: not-allowed;
+    }
+
+    .submit-vote:not(:disabled):hover,
+    .submit-vote:not(:disabled):focus-visible {
+      color: #241a00;
+      background: #fff3c8;
+      outline: none;
+    }
+
+    .confirmation-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(10, 4, 8, .78);
+    }
+
+    .confirmation-modal[hidden] { display: none; }
+
+    .confirmation-content {
+      width: min(100%, 480px);
+      padding: 34px 26px;
+      border: 1px solid rgba(223, 202, 138, .62);
+      color: #f1e7df;
+      background: rgba(35, 8, 17, .94);
+      text-align: center;
+    }
+
+    .confirmation-content h2,
+    .thank-you h2 {
+      margin: 0;
+      color: #f1e7df;
+      font: 600 clamp(42px, 8vw, 68px)/.95 "Cormorant Garamond", Georgia, serif;
+    }
+
+    .confirmation-content p {
+      margin: 16px auto 26px;
+      max-width: 38ch;
+      font: 500 14px/1.6 Manrope, sans-serif;
+    }
+
+    .confirmation-actions {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .confirmation-actions button {
+      padding: 11px 16px;
+      border: 1px solid #dfca8a;
+      color: #dfca8a;
+      background: transparent;
+      font: 700 10px Manrope, sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .confirmation-actions .confirm-submit {
+      color: #241a00;
+      background: #dfca8a;
+    }
+
+    .thank-you {
+      display: none;
+      width: min(100%, 820px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 30vh 24px 72px;
+      text-align: center;
+    }
+
+    .thank-you.is-visible { display: block; }
+
+    .thank-you p {
+      margin: 18px auto 0;
+      color: #dfca8a;
+      font: 700 12px Manrope, sans-serif;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .thank-you-amen {
+      margin-top: 10px !important;
+      color: #f1e7df !important;
+      font-size: 11px !important;
+    }
+
+    .back-home {
+      margin-top: 30px;
+      padding: 12px 18px;
+      border: 1px solid #dfca8a;
+      color: #dfca8a;
+      background: transparent;
+      font: 700 10px Manrope, sans-serif;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .back-home:hover,
+    .back-home:focus-visible {
+      color: #241a00;
+      background: #dfca8a;
+      outline: none;
+    }
+
+    @media (max-width: 600px) {
+      .page-four { padding: 36px 20px 56px; }
+      .nominee-grid { grid-template-columns: 1fr; gap: 34px; }
+      .portrait-frame { height: 280px; }
+    }
+
+    .page.page-two-mode {
+      display: block;
+      min-height: 100svh;
+      background:
+        linear-gradient(90deg, rgba(13, 7, 14, .84), rgba(13, 7, 14, .48)),
+        #141315;
+    }
+
+    .page.page-two-mode .page-background {
+      display: block;
+      opacity: .5;
+    }
+
+    @media (max-width: 760px) {
+      .page-two { padding: 36px 20px 56px; }
+      .story-staircase { min-height: 0; margin-top: 10px; padding: 0 0 24px 18px; }
+      .staircase-art { left: -10px; width: 82px; height: 100%; }
+      .story-step,
+      .story-step:nth-of-type(2),
+      .story-step:nth-of-type(3),
+      .story-step:nth-of-type(4) {
+        width: calc(100% - 6px);
+        min-height: 0;
+        margin-top: 0;
+        padding: 28px 8px 42px 38px;
+        transform: none;
+      }
+      .story-step::before { top: 30px; }
+      .story-step h3 { max-width: 12ch; font-size: clamp(35px, 12vw, 50px); }
+      .story-step p { max-width: 34ch; font-size: 14px; }
+      .categories-cta { margin-left: 38px; }
+      .category-item { grid-template-columns: 38px 1fr auto; gap: 10px; }
+    }
+
+    @media (min-width: 561px) {
+      .page {
+        min-height: 100vh;
+        padding: 0 24px;
+      }
+
+      .access-card {
+        width: min(100%, 430px);
+        margin-top: clamp(160px, 23vh, 300px);
+        padding: 0 0 34px;
+      }
+
+      h1 { font-size: clamp(38px, 8vw, 54px); }
+      .intro { margin-top: 16px; margin-bottom: 64px; }
+      #access-form { margin-top: clamp(56px, 10vh, 96px); }
+      .footer { margin-top: clamp(56px, 10vh, 90px); }
+    }
+
+    @media (min-width: 1000px) {
+      .page {
+        place-items: start;
+        padding-left: clamp(56px, 8vw, 150px);
+      }
+
+      .access-card {
+        width: min(38vw, 500px);
+        margin-top: clamp(170px, 23vh, 300px);
+        text-align: left;
+      }
+
+      .eyebrow { text-align: left; }
+      .intro { margin-left: 0; text-align: left; }
+      .token-wrap { padding-left: 0; }
+      h1 { font-size: clamp(54px, 5vw, 70px); }
+      .intro { max-width: 360px; font-size: 16px; }
+      .token-wrap input { font-size: 18px; }
+      .submit { min-height: 56px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <img class="page-background" src="screen.png" alt="">
+    <section class="access-card" aria-labelledby="page-title">
+      <p class="eyebrow">Hall of Honour · 2024</p>
+      <h1 id="page-title">Ransome Kuti <em>Awards</em></h1>
+      <p class="intro">Please enter your vote token.</p>
+
+      <form id="access-form">
+        <svg class="token-cue" viewBox="0 0 48 58" aria-hidden="true">
+          <path d="M24 5c0 11 1 17 1 29"/>
+          <path d="m17 27 8 7 8-7"/>
+          <circle cx="24" cy="5" r="3"/>
+        </svg>
+        <div class="token-wrap">
+          <input id="token" name="token" type="text" inputmode="text" autocomplete="off"
+            placeholder="Type token here" required>
+          <span class="token-icon" aria-hidden="true">⌾</span>
+        </div>
+        <button class="submit" type="submit">Enter chambers <span aria-hidden="true">→</span></button>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </form>
+
+      <p class="footer">Need assistance with your passcode?</p>
+    </section>
+    <section class="page-two" aria-labelledby="story-title">
+      <header class="page-two-header">
+        <p class="page-two-kicker">The chamber is open</p>
+        <h2 id="story-title">A legacy worth recognising.</h2>
+        <p class="page-two-lead">The Ransome Kuti Awards are a moment to pause, remember the people who shape our halls, and celebrate the character behind their contribution.</p>
+      </header>
+      <div class="story-staircase">
+        <svg class="staircase-art" viewBox="0 0 150 920" preserveAspectRatio="none" aria-hidden="true">
+          <path class="rail" d="M42 8V112l30 28v78l-30 30v78l30 28v78l-30 30v78l30 28v78l-30 30v112"/>
+          <path class="rail" d="M55 8v98l30 27v78l-30 27v78l30 27v78l-30 27v78l30 27v78l-30 27v103"/>
+          <path class="depth" d="M42 112 8 130h48l16-10M42 326 8 344h48l16-10M42 540 8 558h48l16-10M42 754 8 772h48l16-10"/>
+          <path class="step-line" d="M8 130h48M8 344h48M8 558h48M8 772h48"/>
+          <path class="landing" d="M8 130 24 120h48l-16 10Z"/>
+          <path class="landing" d="M8 344 24 334h48l-16 10Z"/>
+          <path class="landing" d="M8 558 24 548h48l-16 10Z"/>
+          <path class="landing" d="M8 772 24 762h48l-16 10Z"/>
+          <line class="post" x1="42" y1="8" x2="42" y2="130"/>
+          <line class="post" x1="72" y1="140" x2="72" y2="214"/>
+          <line class="post" x1="42" y1="326" x2="42" y2="344"/>
+          <line class="post" x1="72" y1="558" x2="72" y2="604"/>
+          <path class="glint" d="M42 8h24M8 130h26M8 344h26M8 558h26M8 772h26"/>
+          <ellipse class="glint" cx="42" cy="8" rx="4" ry="3"/>
+        </svg>
+        <article class="story-step">
+          <span>01 · The beginning</span>
+          <h3>More than a name.</h3>
+          <p>RKH is a shared record of the people, stories, and small acts of excellence that give a community its identity.</p>
+        </article>
+        <article class="story-step">
+          <span>02 · The meaning</span>
+          <h3>Recognition creates memory.</h3>
+          <p>Every nomination gives a meaningful contribution a place in the collective story — and invites the next one.</p>
+        </article>
+        <article class="story-step">
+          <span>03 · The honour</span>
+          <h3>Carry it forward.</h3>
+          <p>The awards are not only a look back. They are a reminder that the next chapter is shaped by all of us.</p>
+        </article>
+        <article class="story-step">
+          <span>04 · The people</span>
+          <h3>See the work behind the name.</h3>
+          <p>Every story begins with a person whose effort, care, and courage leave a mark on the community.</p>
+        </article>
+      </div>
+      <button class="categories-cta" id="categories-cta" type="button">
+        Enter the categories <span aria-hidden="true">→</span>
+      </button>
+    </section>
+    <section class="page-three" aria-labelledby="categories-title">
+      <header class="category-intro">
+        <p class="page-two-kicker">The ballot awaits</p>
+        <h2 id="categories-title">Choose what to honour.</h2>
+        <p>Move through each category with intention. Every selection is a small record of the people who make this community matter.</p>
+      </header>
+      <div class="voting-progress" aria-label="Voting progress">
+        <div class="progress-meta"><span id="progress-label">0 of 22 categories voted</span><span id="progress-percent">0%</span></div>
+        <div class="progress-track"><div class="progress-value" id="progress-value"></div></div>
+      </div>
+      <div class="category-list">
+        <article class="category-item">
+          <span class="category-number">01</span>
+          <div><h3>Creative of the Year</h3><p>Celebrating imagination, craft, and original expression.</p></div>
+          <span class="category-arrow" aria-hidden="true">↗</span>
+        </article>
+        <article class="category-item">
+          <span class="category-number">02</span>
+          <div><h3>Committee of the Year</h3><p>Honouring the committee that made the biggest collective impact.</p></div>
+          <span class="category-arrow" aria-hidden="true">↗</span>
+        </article>
+        <article class="category-item">
+          <span class="category-number">03</span>
+          <div><h3>Fresher of the Year</h3><p>Recognising a standout first-year presence.</p></div>
+          <span class="category-arrow" aria-hidden="true">↗</span>
+        </article>
+        <article class="category-item"><span class="category-number">04</span><div><h3>Most Politically Inclined Fresher</h3><p>For a fresher with a visible voice in hall life.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">05</span><div><h3>Most Fashionable Fresher</h3><p>Recognising a distinctive first-year style.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">06</span><div><h3>Staylite of the Year</h3><p>Celebrating a memorable and influential Staylite.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">07</span><div><h3>Clique of the Year</h3><p>For the group whose presence shaped the year.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">08</span><div><h3>Most Politically Inclined Staylite</h3><p>Recognising a Staylite with a defining public voice.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">09</span><div><h3>Most Fashionable Staylite</h3><p>For a Staylite with unmistakable personal style.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">10</span><div><h3>Finalist of the Year</h3><p>Celebrating a finalist who made their mark.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">11</span><div><h3>Most Politically Inclined Finalist</h3><p>For a finalist whose voice carried weight.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">12</span><div><h3>Most Fashionable Finalist</h3><p>Recognising a finalist with a signature look.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">13</span><div><h3>Pressman of the Year</h3><p>Honouring excellence in communication and coverage.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">14</span><div><h3>Public Speaker of the Year</h3><p>For a voice that commands attention and clarity.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">15</span><div><h3>Sportsman of the Year</h3><p>Celebrating athletic excellence and spirit.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">16</span><div><h3>Ransome Kuti Executive of the Year</h3><p>Recognising outstanding executive leadership.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">17</span><div><h3>Elder of the Year</h3><p>Honouring wisdom, guidance, and lasting influence.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">18</span><div><h3>Most Academically Inclined</h3><p>Celebrating commitment to learning and excellence.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">19</span><div><h3>Entrepreneur of the Year</h3><p>For initiative, enterprise, and building something new.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">20</span><div><h3>Porter of the Year</h3><p>Recognising service, reliability, and care.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">21</span><div><h3>Honorable of the Year</h3><p>For character, honour, and public regard.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+        <article class="category-item"><span class="category-number">22</span><div><h3>Kutiress of the Year</h3><p>Celebrating a woman whose presence stands apart.</p></div><span class="category-arrow" aria-hidden="true">↗</span></article>
+      </div>
+    </section>
+    <section class="page-four" aria-labelledby="nominee-title">
+      <button class="nominee-back" id="nominee-back" type="button">← Back to categories</button>
+      <header class="nominee-heading">
+        <p class="page-two-kicker">The nominees</p>
+        <h2 id="nominee-title">Choose your honour.</h2>
+        <p id="nominee-description">Three names. One vote. Take a moment to recognise the person whose contribution stands out to you.</p>
+      </header>
+      <div class="voting-progress nominee-progress" aria-label="Voting progress">
+        <div class="progress-meta"><span id="nominee-progress-label">0 of 22 categories voted</span><span id="nominee-progress-percent">0%</span></div>
+        <div class="progress-track"><div class="progress-value" id="nominee-progress-value"></div></div>
+      </div>
+      <div class="nominee-grid" id="nominee-grid"></div>
+      <p class="nominee-confirmation" id="nominee-confirmation" role="status" aria-live="polite"></p>
+      <button class="submit-vote" id="submit-vote" type="button" disabled>Submit vote</button>
+      <nav class="nominee-navigation" aria-label="Category navigation">
+        <button id="previous-category" type="button" aria-label="Go to previous category">
+          <svg viewBox="0 0 52 18" aria-hidden="true"><line x1="50" y1="9" x2="4" y2="9"></line><path d="M12 3 4 9l8 6"></path></svg>
+          <span>Previous<br>category</span>
+        </button>
+        <button id="next-category" type="button" aria-label="Go to next category">
+          <span>Next<br>category</span>
+          <svg viewBox="0 0 52 18" aria-hidden="true"><line x1="2" y1="9" x2="48" y2="9"></line><path d="m40 3 8 6-8 6"></path></svg>
+        </button>
+      </nav>
+    </section>
+    <section class="thank-you" id="thank-you" aria-labelledby="thank-you-title">
+      <p>Ransome Kuti Awards</p>
+      <h2 id="thank-you-title">Thank you for voting.</h2>
+      <p>Akoni ti dé.</p>
+      <p class="thank-you-amen">Amin.</p>
+      <button class="back-home" id="back-home" type="button">Back to home</button>
+    </section>
+  </main>
+  <div class="confirmation-modal" id="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="confirmation-title" hidden>
+    <div class="confirmation-content">
+      <p class="page-two-kicker">One final step</p>
+      <h2 id="confirmation-title">Confirm your vote</h2>
+      <p>You have completed every category. Submit your choices now?</p>
+      <div class="confirmation-actions">
+        <button id="cancel-submit" type="button">Go back</button>
+        <button class="confirm-submit" id="confirm-submit" type="button">Confirm vote</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const form = document.querySelector('#access-form');
+    const token = document.querySelector('#token');
+    const status = document.querySelector('#status');
+    const page = document.querySelector('.page');
+    const accessCard = document.querySelector('.access-card');
+    const pageTwo = document.querySelector('.page-two');
+    const pageThree = document.querySelector('.page-three');
+    const categoriesCta = document.querySelector('#categories-cta');
+    const pageFour = document.querySelector('.page-four');
+    const nomineeGrid = document.querySelector('#nominee-grid');
+    const nomineeTitle = document.querySelector('#nominee-title');
+    const nomineeBack = document.querySelector('#nominee-back');
+    const nomineeConfirmation = document.querySelector('#nominee-confirmation');
+    const previousCategory = document.querySelector('#previous-category');
+    const nextCategory = document.querySelector('#next-category');
+    const submitVote = document.querySelector('#submit-vote');
+    const confirmationModal = document.querySelector('#confirmation-modal');
+    const cancelSubmit = document.querySelector('#cancel-submit');
+    const confirmSubmit = document.querySelector('#confirm-submit');
+    const thankYou = document.querySelector('#thank-you');
+    const backHome = document.querySelector('#back-home');
+    const votedCategories = new Map();
+    let activeCategoryIndex = 0;
+    const categoryData = [
+      ['Creative of the Year', ['Amazing Donald', 'Arinola Isaac', 'Khushy']],
+      ['Committee of the Year', ['Sports Committee', 'Defence Committee', 'Health Committee']],
+      ['Fresher of the Year', ['Dave', 'Franky', 'Sanzz Jnr']],
+      ['Most Politically Inclined Fresher', ['Dave', 'Iretomiwa Maforikan', 'Ayandokun Edward']],
+      ['Most Fashionable Fresher', ['Dave', 'Nuren Abdullahi Opeyemi', 'Dr Carbon']],
+      ['Staylite of the Year', ['Arinola Isaac', 'Big Kenzo', 'Yusuf Ibrahim Adeniyi']],
+      ['Clique of the Year', ['AON / Awon Oloko Nla', 'Top Floor Boyz', 'D29 Boys']],
+      ['Most Politically Inclined Staylite', ['Abiodun Gabriel', 'Lawal Feranmi (Vortex)', 'Big Kenzo']],
+      ['Most Fashionable Staylite', ['Ariori Abdulmateen', 'Ogunsanwo Oluwasinaayomi', 'Rikash Design']],
+      ['Finalist of the Year', ['Olakulehin', 'DOD', 'Lasco']],
+      ['Most Politically Inclined Finalist', ['Rhexx', 'Olakulehin', 'Lasco']],
+      ['Most Fashionable Finalist', ['Oyelakin Emmanuel (YAGA)', 'Donald Dominion (KHUSHY)', 'Mr Who']],
+      ['Pressman of the Year', ['Unaji Levi Ugochukwu', 'Michael', 'Abiodun Awujoola']],
+      ['Public Speaker of the Year', ['David Onyeji', 'Gordon', 'Samuel Binuyo']],
+      ['Sportsman of the Year', ['Mahrez', 'Obinna', 'Cartel']],
+      ['Ransome Kuti Executive of the Year', ['Big Kenzo', 'Lasco', 'Mahreez']],
+      ['Elder of the Year', ['Elder Oyelakin Emmanuel (Yaga)', 'Elder Olakulehin', 'Elder Lasco']],
+      ['Most Academically Inclined', ['Habeeb', 'KG', 'Oni Oluwatomilayo']],
+      ['Entrepreneur of the Year', ['YG COLLECTIVES', 'Owolabi Freeman', 'DesignPlusAfrica']],
+      ['Porter of the Year', ['Porter Abbey', 'Porter Fashina', 'Porter Ogiaga']],
+      ['Honorable of the Year', ['Hon Dave', 'Hon OJo', 'Hon Ibrahim Yusuf, Dheniyi']],
+      ['Kutiress of the Year', ['His Favourite Girl', 'Olabisi', 'Testimony']]
+    ];
+
+    const escapeHtml = (value) => value.replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    }[character]));
+
+    const portraitSvg = (index, feminine) => {
+      const skin = feminine ? '#b9795d' : ['#a8644f', '#c68161', '#8e4e40'][index];
+      const shirt = ['#6b1828', '#332033', '#75602e'][index];
+      return `<svg viewBox="0 0 180 230" role="img" aria-label="Illustrated nominee portrait">
+        <path d="M25 230c4-48 24-70 65-70s61 22 65 70" fill="${shirt}"/>
+        <path d="M73 151h34l10 34H63z" fill="${skin}"/>
+        <ellipse cx="90" cy="104" rx="43" ry="53" fill="${skin}"/>
+        <path d="M47 102c-4-48 18-75 45-75 33 0 47 28 41 74-11-18-24-25-43-25-19 0-30 9-43 26Z" fill="#171016"/>
+        <circle cx="74" cy="105" r="4" fill="#171016"/><circle cx="106" cy="105" r="4" fill="#171016"/>
+        <path d="M79 132c8 5 16 5 24 0" fill="none" stroke="#542d2b" stroke-width="3" stroke-linecap="round"/>
+        <path d="M48 91c10-15 18-22 31-23M132 91c-9-15-18-22-31-23" fill="none" stroke="#171016" stroke-width="9" stroke-linecap="round"/>
+      </svg>`;
+    };
+
+    const showNominees = (categoryIndex) => {
+      const [category, names] = categoryData[categoryIndex];
+      const feminine = category === 'Kutiress of the Year';
+      activeCategoryIndex = categoryIndex;
+      nomineeTitle.textContent = category;
+      nomineeConfirmation.textContent = votedCategories.has(categoryIndex)
+        ? `Vote recorded for ${votedCategories.get(categoryIndex)}.`
+        : '';
+      nomineeGrid.innerHTML = names.map((name, index) => `
+        <article class="nominee">
+          <div class="portrait-frame">${portraitSvg(index, feminine)}</div>
+          <span class="nominee-rank">${['First choice', 'Second choice', 'Third choice'][index]}</span>
+          <h3>${escapeHtml(name)}</h3>
+          <button class="nominee-vote${votedCategories.get(categoryIndex) === name ? ' is-selected' : ''}" type="button" data-nominee="${escapeHtml(name)}">${votedCategories.get(categoryIndex) === name ? 'Vote recorded' : 'Vote for this nominee'}</button>
+        </article>`).join('');
+      nomineeGrid.querySelectorAll('.nominee-vote').forEach((button) => {
+        button.addEventListener('click', () => {
+          votedCategories.set(categoryIndex, button.dataset.nominee);
+          updateProgress();
+          showNominees(categoryIndex);
+        });
+      });
+      previousCategory.disabled = categoryIndex === 0;
+      nextCategory.disabled = categoryIndex === categoryData.length - 1;
+      pageThree.classList.remove('is-visible');
+      pageFour.classList.add('is-visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const updateProgress = () => {
+      const count = votedCategories.size;
+      const percent = Math.round((count / categoryData.length) * 100);
+      document.querySelector('#progress-label').textContent = `${count} of ${categoryData.length} categories voted`;
+      document.querySelector('#progress-percent').textContent = `${percent}%`;
+      document.querySelector('#progress-value').style.width = `${percent}%`;
+      document.querySelector('#nominee-progress-label').textContent = `${count} of ${categoryData.length} categories voted`;
+      document.querySelector('#nominee-progress-percent').textContent = `${percent}%`;
+      document.querySelector('#nominee-progress-value').style.width = `${percent}%`;
+      submitVote.disabled = count !== categoryData.length;
+      document.querySelectorAll('.category-item').forEach((item, index) => {
+        item.classList.toggle('is-voted', votedCategories.has(index));
+        const content = item.children[1];
+        if (votedCategories.has(index) && !content.querySelector('.category-check')) {
+          content.insertAdjacentHTML('beforeend', '<span class="category-check">✓ Voted</span>');
+        }
+      });
+    };
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!token.value.trim()) {
+        status.textContent = 'Enter your hall vote token to continue.';
+        return;
+      }
+      accessCard.hidden = true;
+      page.classList.add('page-two-mode');
+      pageTwo.classList.add('is-visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    categoriesCta.addEventListener('click', () => {
+      pageTwo.classList.remove('is-visible');
+      pageThree.classList.add('is-visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.querySelectorAll('.category-item').forEach((item, index) => {
+      item.addEventListener('click', () => showNominees(index));
+      item.setAttribute('tabindex', '0');
+      item.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') showNominees(index);
+      });
+    });
+
+    nomineeBack.addEventListener('click', () => {
+      pageFour.classList.remove('is-visible');
+      pageThree.classList.add('is-visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    previousCategory.addEventListener('click', () => {
+      if (activeCategoryIndex > 0) showNominees(activeCategoryIndex - 1);
+    });
+
+    nextCategory.addEventListener('click', () => {
+      if (activeCategoryIndex < categoryData.length - 1) showNominees(activeCategoryIndex + 1);
+    });
+
+    submitVote.addEventListener('click', () => {
+      if (votedCategories.size === categoryData.length) confirmationModal.hidden = false;
+    });
+
+    cancelSubmit.addEventListener('click', () => {
+      confirmationModal.hidden = true;
+    });
+
+    confirmSubmit.addEventListener('click', () => {
+      confirmationModal.hidden = true;
+      pageFour.classList.remove('is-visible');
+      thankYou.classList.add('is-visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backHome.addEventListener('click', () => {
+      thankYou.classList.remove('is-visible');
+      page.classList.remove('page-two-mode');
+      pageTwo.classList.remove('is-visible');
+      pageThree.classList.remove('is-visible');
+      pageFour.classList.remove('is-visible');
+      accessCard.hidden = false;
+      token.value = '';
+      status.textContent = '';
+      votedCategories.clear();
+      updateProgress();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    updateProgress();
+  </script>
+</body>
+</html>

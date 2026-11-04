@@ -1,0 +1,13 @@
+{
+  "name": "award-voting",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public --port 8788",
+    "db:local": "wrangler d1 execute voting --local --file=schema.sql",
+    "deploy": "wrangler pages deploy public"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}
