@@ -54,6 +54,11 @@
         linear-gradient(180deg, rgba(20, 7, 15, .28), rgba(10, 5, 10, .58));
     }
 
+    .page:not(.page-two-mode) {
+      height: 100svh;
+      overflow: hidden;
+    }
+
     .page-background {
       position: absolute;
       inset: 0;
@@ -1228,7 +1233,11 @@
         button.addEventListener('click', () => {
           votedCategories.set(categoryIndex, button.dataset.nominee);
           updateProgress();
-          showNominees(categoryIndex);
+          if (categoryIndex < categoryData.length - 1) {
+            window.setTimeout(() => showNominees(categoryIndex + 1), 450);
+          } else {
+            showNominees(categoryIndex);
+          }
         });
       });
       previousCategory.disabled = categoryIndex === 0;
