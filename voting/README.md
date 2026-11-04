@@ -3,6 +3,9 @@
 Email-link voting, no signup. One unique single-use link per voter, one vote per category,
 enforced by the database. Your UI just calls two endpoints.
 
+For the full Cloudflare setup and go-live checklist, see
+[DEPLOYMENT.md](./DEPLOYMENT.md).
+
 ## 1. Edit
 - `src/config.js` – categories and nominees (IDs must not change once voting starts)
 - `wrangler.toml` – VOTING_OPENS / VOTING_CLOSES, REQUIRE_EMAIL_CONFIRM
