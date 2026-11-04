@@ -27,10 +27,15 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Prepare demo
+        run: |
+          mkdir site
+          cp index.html screen.png site/
+
       - name: Upload demo
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: site
 
       - name: Deploy to Pages
         id: deployment
