@@ -19,16 +19,29 @@ export function safeEqual(a, b) {
   return diff === 0;
 }
 
-export function json(data, status = 200) {
+export function json(data, status = 200, request, env) {
+  const headers = {
+    "content-type": "application/json",
+    "cache-control": "no-store",
+    "referrer-policy": "no-referrer",
+    "x-content-type-options": "nosniff",
+  };
+  Object.assign(headers, corsHeaders(request, env));
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "content-type": "application/json",
-      "cache-control": "no-store",
-      "referrer-policy": "no-referrer",
-      "x-content-type-options": "nosniff",
-    },
+    headers,
   });
+}
+
+export function corsHeaders(request, env) {
+  const origin = request && env && env.PUBLIC_ORIGIN;
+  if (!origin || request.headers.get("Origin") !== origin) return {};
+  return {
+    "access-control-allow-origin": origin,
+    "access-control-allow-methods": "POST, OPTIONS",
+    "access-control-allow-headers": "content-type, idempotency-key",
+    vary: "Origin",
+  };
 }
 
 export async function readBody(request) {
@@ -56,7 +69,25 @@ export function votingState(env, now = Date.now()) {
 export async function findVoter(env, token) {
   if (typeof token !== "string" || !TOKEN_RE.test(token)) return null;
   const tokenHash = await sha256Hex(token);
-  return await env.DB.prepare("SELECT id, email_hash FROM voters WHERE token_hash = ?").bind(tokenHash).first();
+  return await env.DB.prepare("SELECT id, token_hash, email_hash FROM voters WHERE token_hash = ? AND revoked_at IS NULL").bind(tokenHash).first();
+}
+
+export async function rateLimit(env, key, limit, windowMs = 60000) {
+  const keyHash = await sha256Hex(key);
+  const now = Date.now();
+  await env.DB.prepare(`
+    INSERT INTO rate_limits (key_hash, window_start, request_count) VALUES (?, ?, 1)
+    ON CONFLICT(key_hash) DO UPDATE SET
+      request_count = CASE WHEN ? - window_start >= ? THEN 1 ELSE request_count + 1 END,
+      window_start = CASE WHEN ? - window_start >= ? THEN ? ELSE window_start END
+  `).bind(keyHash, now, now, windowMs, now, windowMs, now).run();
+  const row = await env.DB.prepare("SELECT request_count FROM rate_limits WHERE key_hash = ?").bind(keyHash).first();
+  return row.request_count <= limit;
+}
+
+export function requestKey(request, body) {
+  const supplied = request.headers.get("Idempotency-Key") || body.idempotencyKey;
+  return typeof supplied === "string" && /^[A-Za-z0-9._-]{16,100}$/.test(supplied) ? supplied : null;
 }
 
 export async function emailMatches(env, voter, email) {

@@ -14,7 +14,7 @@
     html { scrollbar-width: none; }
     html::-webkit-scrollbar { display: none; }
     body { min-width: 320px; min-height: 100vh; margin: 0; color: var(--cream); background: var(--dark); font-family: Manrope, sans-serif; }
-    body::before { content: ""; position: fixed; inset: 0; z-index: -2; background: linear-gradient(90deg, rgba(13, 7, 14, .8), rgba(13, 7, 14, .38)), url("screen.png") center / cover; }
+    body::before { content: ""; position: fixed; inset: 0; z-index: -2; background: linear-gradient(90deg, rgba(13, 7, 14, .8), rgba(13, 7, 14, .38)), url("screen.webp") center / cover; }
     body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 50% 30%, transparent 12%, rgba(7, 3, 8, .34) 68%, rgba(4, 2, 5, .76)); }
     button, input { font: inherit; }
     button { cursor: pointer; }
@@ -130,9 +130,15 @@
     const session = { token: new URL(location.href).searchParams.get("t") || sessionStorage.getItem("t") || "", email: sessionStorage.getItem("e") || "", categories: [], voted: new Set(), active: 0 };
     if (session.token) { sessionStorage.setItem("t", session.token); history.replaceState({}, "", location.pathname); }
 
-    const api = async (path, body) => {
-      const response = await fetch(`/api/${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-      return { status: response.status, data: await response.json().catch(() => ({})) };
+    const api = async (path, body, idempotencyKey) => {
+      try {
+        const headers = { "content-type": "application/json" };
+        if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
+        const response = await fetch(`/api/${path}`, { method: "POST", headers, body: JSON.stringify(body) });
+        return { status: response.status, data: await response.json().catch(() => ({})) };
+      } catch {
+        return { status: 0, data: { error: "network_error" } };
+      }
     };
     const show = (name) => Object.entries(screens).forEach(([key, screen]) => screen.classList.toggle("is-visible", key === name));
     const message = (element, text) => { element.textContent = text; };
@@ -171,12 +177,23 @@
     };
     const castVote = async (category, nomineeId) => {
       if (session.voted.has(category.id)) return;
+      const requestKey = `vote-${category.id}-${crypto.randomUUID()}`;
+      continueButton.disabled = true;
       nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => { choice.disabled = true; });
       message(nomineeStatus, "Recording your vote…");
-      const result = await api("vote", { token: session.token, email: session.email || undefined, votes: { [category.id]: nomineeId } });
+      const result = await api("vote", { token: session.token, email: session.email || undefined, votes: { [category.id]: nomineeId }, idempotencyKey: requestKey }, requestKey);
       if (result.status !== 200) {
+        continueButton.disabled = false;
         nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => { choice.disabled = false; });
-        const errors = { already_voted: "This category has already been recorded.", closed: "Voting has closed.", not_open: "Voting has not opened yet.", invalid_link: "This voting link is no longer valid.", email_mismatch: "That email does not match this voting link.", captcha_failed: "Please complete the security check." };
+        if (result.data.error === "already_voted" || result.status === 0) {
+          const refreshed = await api("session", { token: session.token, email: session.email || undefined });
+          if (refreshed.status === 200 && refreshed.data.step === "vote") {
+            session.voted = new Set(refreshed.data.votedCategories);
+            updateProgress();
+            renderCategories();
+          }
+        }
+        const errors = { already_voted: "This category has already been recorded.", closed: "Voting has closed.", not_open: "Voting has not opened yet.", invalid_link: "This voting link is no longer valid.", email_mismatch: "That email does not match this voting link.", captcha_failed: "Please complete the security check.", rate_limited: "Too many attempts. Please wait a moment.", network_error: "Connection failed. Please try again." };
         message(nomineeStatus, errors[result.data.error] || "We could not record that vote. Please try again.");
         return;
       }
@@ -184,6 +201,7 @@
       updateProgress();
       renderCategories();
       message(nomineeStatus, "Vote recorded.");
+      continueButton.disabled = false;
       if (result.data.allVoted) { continueButton.textContent = "Finish ballot →"; return; }
       const next = session.categories.findIndex((item, index) => index > session.active && !session.voted.has(item.id));
       window.setTimeout(() => openNominees(next >= 0 ? next : session.categories.findIndex((item) => !session.voted.has(item.id))), 500);

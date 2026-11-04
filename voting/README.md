@@ -6,6 +6,8 @@ enforced by the database. Your UI just calls two endpoints.
 ## 1. Edit
 - `src/config.js` – categories and nominees (IDs must not change once voting starts)
 - `wrangler.toml` – VOTING_OPENS / VOTING_CLOSES, REQUIRE_EMAIL_CONFIRM
+- `schema.sql` – D1 tables and uniqueness constraints (run migrations against an existing database before deployment)
+- `migrations/001-hardening.sql` – one-time upgrade for a database created with the earlier schema
 
 ## 2. Deploy
 ```bash
@@ -13,6 +15,7 @@ npm install
 npx wrangler login
 npx wrangler d1 create voting            # copy database_id into wrangler.toml
 npx wrangler d1 execute voting --remote --file=schema.sql
+# Existing databases: run migrations/001-hardening.sql instead of schema.sql
 npx wrangler pages project create award-voting --production-branch main
 npx wrangler pages secret put EMAIL_PEPPER --project-name award-voting   # long random string
 npx wrangler pages secret put ADMIN_KEY    --project-name award-voting   # long random string
@@ -42,7 +45,7 @@ Do not re-run the script for the same list (it would invalidate links already se
 - `{ step: "email" }` -> ask the voter for their email, call again with it
 - `{ step: "vote", state, votedCategories, allVoted, categories }`; state is `not_open | open | closed`
 
-`POST /api/vote` `{ token, email?, turnstile?, votes: { "<categoryId>": "<nomineeId>" } }`
+`POST /api/vote` `{ token, email?, turnstile?, idempotencyKey, votes: { "<categoryId>": "<nomineeId>" } }`
 - 200 `{ ok, votedCategories, allVoted }`
 - 409 `already_voted` | 400 `invalid_choice` | 403 `captcha_failed | closed | not_open | invalid_link | email_mismatch`
 - Voters can submit all categories at once or come back for the rest. Each category is final once voted.
@@ -55,6 +58,10 @@ The production frontend reads categories from `/api/session`, records each selec
 through `/api/vote`, preserves the email-link token in session storage, and advances to the next
 unvoted category after a successful vote.
 Keep the token out of the address bar (the reference page strips it) and send `Referrer-Policy: no-referrer`.
+Set `PUBLIC_ORIGIN` to the exact production origin. The API validates the token and email on every request,
+rejects revoked voters, rate-limits by token and IP in D1, and uses an idempotency key so safe retries do not
+create a second vote. The `(voter_id, category_id)` primary key and `(token_hash, category_id)` unique constraint
+are enforced by D1, not by page state.
 
 ## Tested
 `node scripts/loadtest.mjs http://localhost:8788` fires every voter twice simultaneously

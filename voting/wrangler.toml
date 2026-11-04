@@ -13,3 +13,5 @@ VOTING_OPENS  = "2026-11-10T08:00:00+01:00"
 VOTING_CLOSES = "2026-11-17T23:59:00+01:00"
 # "true" = voter must also type the email the link was sent to (stops forwarded links)
 REQUIRE_EMAIL_CONFIRM = "true"
+# Exact origin allowed to call the JSON API.
+PUBLIC_ORIGIN = "https://vote.yourdomain.com"
