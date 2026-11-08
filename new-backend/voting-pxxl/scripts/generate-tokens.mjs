@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 // Usage:
-//   EMAIL_PEPPER=<same value as the Cloudflare secret> BASE_URL=https://vote.yourdomain.com \
+//   EMAIL_PEPPER=<same value as on the server> BASE_URL=https://vote.yourdomain.com \
 //   node scripts/generate-tokens.mjs voters.csv
 //
 // Input : CSV with an "email" column (or just one email per line).
-// Output: out/seed.sql   -> load into D1 (stores only hashes)
-//         out/links.csv  -> email,link  -> import into Sendbyte as merge fields. KEEP PRIVATE.
+// Output: out/links.csv   email,link   -> import into Sendbyte as merge fields. KEEP PRIVATE.
+//         out/voters.json hashes only  -> load with scripts/upload-voters.mjs
+//         out/seed.sql    same hashes as SQL, if you prefer to run it in a DB client
 import fs from "node:fs";
 import crypto from "node:crypto";
 
@@ -17,7 +18,10 @@ if (!BASE_URL || !PEPPER) {
   process.exit(1);
 }
 if (fs.existsSync("out/links.csv") && !process.argv.includes("--force")) {
-  console.error("out/links.csv already exists. Re-running would issue NEW tokens and invalidate links already emailed.\nUse a fresh voters file for late additions, or pass --force if you really mean it.");
+  console.error(
+    "out/links.csv already exists. Re-running would issue NEW tokens and invalidate links already emailed.\n" +
+      "Use a fresh voters file for late additions (move out/ aside first), or pass --force if you really mean it."
+  );
   process.exit(1);
 }
 
@@ -42,21 +46,19 @@ for (const row of rows) {
   out.push({
     email,
     token,
-    tokenHash: crypto.createHash("sha256").update(token).digest("hex"),
-    emailHash: crypto.createHmac("sha256", PEPPER).update(email).digest("hex"),
+    token_hash: crypto.createHash("sha256").update(token).digest("hex"),
+    email_hash: crypto.createHmac("sha256", PEPPER).update(email).digest("hex"),
   });
 }
 
 fs.mkdirSync("out", { recursive: true });
+fs.writeFileSync("out/voters.json", JSON.stringify(out.map(({ token_hash, email_hash }) => ({ token_hash, email_hash }))));
 fs.writeFileSync(
   "out/seed.sql",
-  out.map((v) => `INSERT INTO voters (token_hash, email_hash) VALUES ('${v.tokenHash}', '${v.emailHash}');`).join("\n") + "\n"
+  out.map((v) => `INSERT INTO voters (token_hash, email_hash) VALUES ('${v.token_hash}', '${v.email_hash}') ON CONFLICT DO NOTHING;`).join("\n") + "\n"
 );
-fs.writeFileSync(
-  "out/links.csv",
-  "email,link\n" + out.map((v) => `${v.email},${BASE_URL}/?t=${v.token}`).join("\n") + "\n"
-);
+fs.writeFileSync("out/links.csv", "email,link\n" + out.map((v) => `${v.email},${BASE_URL}/?t=${v.token}`).join("\n") + "\n");
 
 console.log(`Voters: ${out.length} | duplicates skipped: ${dupes} | invalid skipped: ${invalid.length}`);
 if (invalid.length) console.log("Invalid:", invalid.slice(0, 20).join(", "));
-console.log("Wrote out/seed.sql and out/links.csv");
+console.log("Wrote out/links.csv, out/voters.json and out/seed.sql");

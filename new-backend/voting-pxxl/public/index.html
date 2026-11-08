@@ -85,12 +85,8 @@
       <div class="access-inner">
         <p class="eyebrow">Hall of Honour · Ransome Kuti Awards</p>
         <h1>Enter the <em>chambers.</em></h1>
-        <p class="lead">Your private voting link is ready. Enter the email address this link was sent to continue.</p>
-        <form class="access-form" id="email-form">
-          <input id="email" type="email" autocomplete="email" placeholder="Your email address" required>
-          <button class="primary" type="submit">Open ballot →</button>
-        </form>
-        <p class="message" id="access-message" role="status" aria-live="polite"></p>
+        <p class="lead">Your ballot is ready. We are preparing the chambers for you.</p>
+        <p class="message" id="access-message" role="status" aria-live="polite">Opening ballot…</p>
       </div>
     </section>
     <section class="screen" id="categories-screen">
@@ -111,6 +107,7 @@
       <div><p class="kicker">Ransome Kuti Awards</p><h2>Thank you for voting.</h2><p class="kicker">Akoni ti dé.</p><p>Amin.</p><button class="secondary" id="home" type="button">Back to home</button></div>
     </section>
   </main>
+  <script src="fp.js"></script>
   <script>
     const screens = {
       access: document.querySelector("#access-screen"),
@@ -118,8 +115,6 @@
       nominees: document.querySelector("#nominees-screen"),
       thankYou: document.querySelector("#thank-you-screen"),
     };
-    const emailForm = document.querySelector("#email-form");
-    const emailInput = document.querySelector("#email");
     const accessMessage = document.querySelector("#access-message");
     const categoryList = document.querySelector("#category-list");
     const nomineeGrid = document.querySelector("#nominee-grid");
@@ -127,14 +122,13 @@
     const nomineeStatus = document.querySelector("#nominee-status");
     const continueButton = document.querySelector("#continue");
     const previousButton = document.querySelector("#previous");
-    const session = { token: new URL(location.href).searchParams.get("t") || sessionStorage.getItem("t") || "", email: sessionStorage.getItem("e") || "", categories: [], voted: new Set(), active: 0 };
-    if (session.token) { sessionStorage.setItem("t", session.token); history.replaceState({}, "", location.pathname); }
+    const session = { fp: "", categories: [], voted: new Set(), active: 0 };
 
     const api = async (path, body, idempotencyKey) => {
       try {
         const headers = { "content-type": "application/json" };
         if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
-        const response = await fetch(`/api/${path}`, { method: "POST", headers, body: JSON.stringify(body) });
+        const response = await fetch(`/api/${path}`, { method: "POST", credentials: "same-origin", headers, body: JSON.stringify(body) });
         return { status: response.status, data: await response.json().catch(() => ({})) };
       } catch {
         return { status: 0, data: { error: "network_error" } };
@@ -181,12 +175,12 @@
       continueButton.disabled = true;
       nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => { choice.disabled = true; });
       message(nomineeStatus, "Recording your vote…");
-      const result = await api("vote", { token: session.token, email: session.email || undefined, votes: { [category.id]: nomineeId }, idempotencyKey: requestKey }, requestKey);
+      const result = await api("vote", { fp: session.fp, votes: { [category.id]: nomineeId } }, requestKey);
       if (result.status !== 200) {
         continueButton.disabled = false;
         nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => { choice.disabled = false; });
         if (result.data.error === "already_voted" || result.status === 0) {
-          const refreshed = await api("session", { token: session.token, email: session.email || undefined });
+          const refreshed = await api("session", { fp: session.fp });
           if (refreshed.status === 200 && refreshed.data.step === "vote") {
             session.voted = new Set(refreshed.data.votedCategories);
             updateProgress();
@@ -207,11 +201,9 @@
       window.setTimeout(() => openNominees(next >= 0 ? next : session.categories.findIndex((item) => !session.voted.has(item.id))), 500);
     };
     const start = async () => {
-      if (!session.token) { message(accessMessage, "Open the private voting link from your email."); return; }
-      if (!session.email) { emailInput.focus(); return; }
-      const result = await api("session", { token: session.token, email: session.email });
-      if (result.data.error === "email_mismatch") { sessionStorage.removeItem("e"); session.email = ""; message(accessMessage, "That email does not match this voting link."); return; }
-      if (result.data.error === "invalid_link") { message(accessMessage, "This voting link is invalid."); return; }
+      session.fp = await getFingerprint();
+      const result = await api("session", { fp: session.fp });
+      if (result.status !== 200) { message(accessMessage, "We could not open the ballot. Please try again."); return; }
       if (result.data.state === "not_open") { message(accessMessage, "Voting has not opened yet."); return; }
       if (result.data.state === "closed") { message(accessMessage, "Voting has closed."); return; }
       session.categories = result.data.categories;
@@ -220,8 +212,7 @@
       renderCategories();
       show("categories");
     };
-    emailForm.addEventListener("submit", (event) => { event.preventDefault(); session.email = emailInput.value.trim(); sessionStorage.setItem("e", session.email); start(); });
-    document.querySelector("#sign-out").addEventListener("click", () => { sessionStorage.clear(); location.reload(); });
+    document.querySelector("#sign-out").addEventListener("click", () => location.reload());
     document.querySelector("#nominees-back").addEventListener("click", () => { renderCategories(); show("categories"); });
     previousButton.addEventListener("click", () => openNominees(session.active - 1));
     continueButton.addEventListener("click", () => {
@@ -230,7 +221,6 @@
       if (next >= 0) openNominees(next);
     });
     document.querySelector("#home").addEventListener("click", () => { sessionStorage.clear(); location.href = location.pathname; });
-    if (session.email) emailInput.value = session.email;
     start();
   </script>
 </body>
