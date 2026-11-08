@@ -1,7 +1,7 @@
 // Browser fingerprint for device mode. Include in the UI and send the result as `fp` with every
 // /api/session and /api/vote call. Deliberately coarse: stable signals only, so one person is not
 // split into several devices. It is NOT secret and a script can fake it; see README.
-export async function getFingerprint() {
+async function getFingerprint() {
   const parts = [
     navigator.userAgent,
     navigator.language,
@@ -19,6 +19,8 @@ export async function getFingerprint() {
   const buf = await crypto.subtle.digest("SHA-256", data);
   return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
+
+window.getFingerprint = getFingerprint;
 
 function canvasSig() {
   try {
