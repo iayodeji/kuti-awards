@@ -220,6 +220,24 @@
     };
     const message = (element, text) => { element.textContent = text; };
     const escapeHtml = (value) => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
+    const shuffleNominees = (nominees, seedText) => {
+      let seed = 2166136261;
+      for (const character of seedText) {
+        seed ^= character.charCodeAt(0);
+        seed = Math.imul(seed, 16777619);
+      }
+      const shuffled = [...nominees];
+      for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        seed += seed << 13;
+        seed ^= seed >>> 7;
+        seed += seed << 3;
+        seed ^= seed >>> 17;
+        seed += seed << 5;
+        const swapIndex = Math.abs(seed) % (index + 1);
+        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+      }
+      return shuffled;
+    };
     const imageUrl = (image) => {
       if (!image || location.hostname !== "localhost") return image;
       const path = new URL(image).pathname;
@@ -262,7 +280,8 @@
       nomineeTitle.textContent = category.name;
       nomineeStatus.textContent = "";
       const feminine = category.id === "kutiress-of-the-year";
-      nomineeGrid.innerHTML = category.nominees.map((nominee, nomineeIndex) => `<article class="nominee"><button class="portrait" type="button" data-id="${nominee.id}" aria-label="Vote for ${escapeHtml(nominee.name)}">${portrait(nomineeIndex, feminine, nominee.image)}</button><h3>${escapeHtml(nominee.name)}</h3></article>`).join("");
+      const nominees = shuffleNominees(category.nominees, `${session.fp}:${category.id}`);
+      nomineeGrid.innerHTML = nominees.map((nominee, nomineeIndex) => `<article class="nominee"><button class="portrait" type="button" data-id="${nominee.id}" aria-label="Vote for ${escapeHtml(nominee.name)}">${portrait(nomineeIndex, feminine, nominee.image)}</button><h3>${escapeHtml(nominee.name)}</h3></article>`).join("");
       nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => choice.addEventListener("click", () => castVote(category, choice.dataset.id)));
       previousButton.disabled = index === 0;
       continueButton.textContent = session.voted.has(category.id) ? (session.voted.size === session.categories.length ? "Finish ballot →" : "Next category →") : "Choose a nominee";
