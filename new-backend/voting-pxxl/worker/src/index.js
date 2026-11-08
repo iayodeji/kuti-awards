@@ -47,7 +47,7 @@ async function cookieVoterId(request, env) {
   if (dot < 1) return null;
   const id = value.slice(0, dot);
   if (!/^[0-9a-f-]{36}$/.test(id) || value !== await signVoter(env.COOKIE_SECRET, id)) return null;
-  const voter = await env.DB.prepare("SELECT id FROM voters WHERE id = ?").bind(id).first();
+  const voter = await env.akoni_voting.prepare("SELECT id FROM voters WHERE id = ?").bind(id).first();
   return voter?.id || null;
 }
 
@@ -63,8 +63,8 @@ async function alreadyVoted(request, env, fp) {
   const voterId = await cookieVoterId(request, env);
   const fpHash = fp ? await digest(env.COOKIE_SECRET, `fp:${fp}`) : null;
   const queries = [];
-  if (voterId) queries.push(env.DB.prepare("SELECT category_id FROM votes WHERE voter_id = ?").bind(voterId).all());
-  if (fpHash) queries.push(env.DB.prepare("SELECT category_id FROM votes WHERE fp_hash = ?").bind(fpHash).all());
+  if (voterId) queries.push(env.akoni_voting.prepare("SELECT category_id FROM votes WHERE voter_id = ?").bind(voterId).all());
+  if (fpHash) queries.push(env.akoni_voting.prepare("SELECT category_id FROM votes WHERE fp_hash = ?").bind(fpHash).all());
   const results = await Promise.all(queries);
   return {
     voterId,
@@ -129,18 +129,18 @@ async function handleVote(request, env) {
   const voterId = current.voterId || crypto.randomUUID();
   const ipHash = await digest(env.COOKIE_SECRET, `ip:${clientIp(request)}`);
   if (!current.voterId && Number(env.IP_BALLOT_CAP || 0) > 0) {
-    const ipTurnout = await env.DB.prepare("SELECT COUNT(DISTINCT voter_id) AS ballots FROM votes WHERE ip_hash = ?").bind(ipHash).first();
+    const ipTurnout = await env.akoni_voting.prepare("SELECT COUNT(DISTINCT voter_id) AS ballots FROM votes WHERE ip_hash = ?").bind(ipHash).first();
     if (Number(ipTurnout?.ballots || 0) >= Number(env.IP_BALLOT_CAP)) return json({ error: "ip_limit" }, 429);
   }
   const statements = [
-    env.DB.prepare("INSERT OR IGNORE INTO voters (id) VALUES (?)").bind(voterId),
-    ...entries.map(([categoryId, nomineeId]) => env.DB.prepare(
+    env.akoni_voting.prepare("INSERT OR IGNORE INTO voters (id) VALUES (?)").bind(voterId),
+    ...entries.map(([categoryId, nomineeId]) => env.akoni_voting.prepare(
       "INSERT INTO votes (voter_id, category_id, nominee_id, fp_hash, ip_hash) VALUES (?, ?, ?, ?, ?)"
     ).bind(voterId, categoryId, nomineeId, current.fpHash, ipHash)),
-    env.DB.prepare("UPDATE voters SET last_vote_at = datetime('now') WHERE id = ?").bind(voterId),
+    env.akoni_voting.prepare("UPDATE voters SET last_vote_at = datetime('now') WHERE id = ?").bind(voterId),
   ];
   try {
-    await env.DB.batch(statements);
+    await env.akoni_voting.batch(statements);
   } catch (error) {
     if (error?.message?.includes("UNIQUE")) return json({ error: "already_voted" }, 409);
     throw error;
@@ -154,8 +154,8 @@ async function handleVote(request, env) {
 
 async function handleResults(request, env) {
   if (request.headers.get("x-admin-key") !== env.ADMIN_KEY) return json({ error: "forbidden" }, 403);
-  const tally = await env.DB.prepare("SELECT category_id, nominee_id, COUNT(*) AS votes FROM votes GROUP BY category_id, nominee_id").all();
-  const turnout = await env.DB.prepare("SELECT COUNT(DISTINCT voter_id) AS voted FROM votes").first();
+  const tally = await env.akoni_voting.prepare("SELECT category_id, nominee_id, COUNT(*) AS votes FROM votes GROUP BY category_id, nominee_id").all();
+  const turnout = await env.akoni_voting.prepare("SELECT COUNT(DISTINCT voter_id) AS voted FROM votes").first();
   const configured = categoriesForClient();
   return json({
     turnout: { voted: Number(turnout?.voted || 0) },
