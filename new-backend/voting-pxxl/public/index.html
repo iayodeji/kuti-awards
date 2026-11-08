@@ -23,6 +23,7 @@
     .screen { display: none !important; }
     .screen.is-visible { display: block !important; }
     .screen.is-visible.access, .screen.is-visible.thank-you { display: grid !important; }
+    .screen.is-visible.story { display: block !important; }
     .access { display: grid; min-height: calc(100vh - 98px); place-items: center; padding: 8vh 0 10vh; text-align: center; }
     .access-inner { display: flex; width: min(100%, 460px); flex-direction: column; align-items: center; }
     .eyebrow, .kicker { margin: 0 0 28px; color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
@@ -40,6 +41,27 @@
     .secondary:hover, .secondary:focus-visible { color: #241a00; background: var(--gold); }
     .message { min-height: 22px; margin: 28px 0 14px; color: var(--gold); font-size: 12px; }
     #enter-ballot { min-width: 190px; margin-top: 4px; padding: 17px 24px; box-shadow: 0 12px 30px rgba(0, 0, 0, .24); }
+    .story { min-height: calc(100svh - 98px); padding: 22px 0 56px; }
+    .story-intro { max-width: 620px; margin: 52px 0 34px; }
+    .story-intro h2 { margin: 0 0 18px; font-size: clamp(48px, 10vw, 78px); }
+    .story-intro p:last-child { max-width: 42ch; margin: 0; font-size: 15px; line-height: 1.7; }
+    .story-staircase { position: relative; display: grid; gap: 12px; min-height: 720px; margin: 0 0 28px; padding: 8px 0 30px 54px; }
+    .staircase-art { position: absolute; inset: 0 auto 0 0; z-index: 0; width: 76px; height: 100%; pointer-events: none; opacity: .8; }
+    .staircase-art path, .staircase-art line, .staircase-art ellipse { fill: none; stroke: var(--gold); stroke-linecap: round; stroke-linejoin: round; }
+    .staircase-art .rail { stroke-width: 2; }
+    .staircase-art .depth, .staircase-art .step-line { stroke-width: 1.1; opacity: .65; }
+    .staircase-art .post { stroke-width: 1.2; opacity: .72; }
+    .staircase-art .landing { fill: rgba(15, 7, 12, .12); stroke-width: 1; opacity: .65; }
+    .staircase-art .glint { stroke: #f3e5b6; stroke-width: 1; opacity: .65; }
+    .story-step { position: relative; z-index: 1; max-width: 520px; min-height: 154px; padding: 18px 0 18px 26px; }
+    .story-step::before { content: ""; position: absolute; top: 24px; left: -5px; width: 9px; height: 9px; border: 1px solid var(--gold); border-radius: 50%; background: var(--dark); }
+    .story-step:nth-of-type(2) { margin-left: 7%; }
+    .story-step:nth-of-type(3) { margin-left: 14%; }
+    .story-step:nth-of-type(4) { margin-left: 21%; }
+    .story-step span { display: block; margin-bottom: 10px; color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .story-step h3 { max-width: 14ch; margin: 0 0 8px; font-size: clamp(30px, 6vw, 48px); line-height: .94; }
+    .story-step p { max-width: 38ch; margin: 0; color: #e4d8d5; font-size: 13px; line-height: 1.6; }
+    .story-actions { display: flex; justify-content: flex-end; }
     .topline { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
     .back { padding: 0; border: 0; color: var(--gold); background: transparent; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
     .heading { max-width: 720px; margin: 48px 0 28px; }
@@ -79,6 +101,12 @@
       h1 { margin-bottom: 24px; }
       .lead { font-size: 14px; line-height: 1.8; }
       .message { margin-top: 30px; }
+      .story { min-height: calc(100svh - 72px); padding: 8px 0 38px; }
+      .story-intro { margin: 40px 0 24px; }
+      .story-intro h2 { font-size: clamp(46px, 12vw, 64px); }
+      .story-staircase { min-height: 690px; padding-left: 42px; }
+      .staircase-art { left: -8px; width: 62px; }
+      .story-step, .story-step:nth-of-type(2), .story-step:nth-of-type(3), .story-step:nth-of-type(4) { margin-left: 0; padding-left: 20px; }
       .nominee-grid { grid-template-columns: 1fr; gap: 30px; }
       .portrait { height: 280px; }
       .actions { align-items: stretch; }
@@ -96,6 +124,34 @@
         <p class="message" id="access-message" role="status" aria-live="polite">Preparing your ballot…</p>
         <button class="primary" id="enter-ballot" type="button" hidden>Enter the ballot →</button>
       </div>
+    </section>
+    <section class="screen story" id="story-screen">
+      <button class="back" id="story-back" type="button">← Back</button>
+      <header class="story-intro">
+        <p class="kicker">The chamber is open</p>
+        <h2>A legacy worth recognising.</h2>
+        <p>The Ransome Kuti Awards are a moment to pause, remember the people who shape our halls, and celebrate the character behind their contribution.</p>
+      </header>
+      <div class="story-staircase">
+        <svg class="staircase-art" viewBox="0 0 150 920" preserveAspectRatio="none" aria-hidden="true">
+          <path class="rail" d="M42 8V112l30 28v78l-30 30v78l30 28v78l-30 30v78l30 28v78l-30 30v112"/>
+          <path class="rail" d="M55 8v98l30 27v78l-30 27v78l30 27v78l-30 27v78l30 27v78l-30 27v103"/>
+          <path class="depth" d="M42 112 8 130h48l16-10M42 326 8 344h48l16-10M42 540 8 558h48l16-10M42 754 8 772h48l16-10"/>
+          <path class="step-line" d="M8 130h48M8 344h48M8 558h48M8 772h48"/>
+          <path class="landing" d="M8 130 24 120h48l-16 10ZM8 344 24 334h48l-16 10ZM8 558 24 548h48l-16 10ZM8 772 24 762h48l-16 10Z"/>
+          <line class="post" x1="42" y1="8" x2="42" y2="130"/>
+          <line class="post" x1="72" y1="140" x2="72" y2="214"/>
+          <line class="post" x1="42" y1="326" x2="42" y2="344"/>
+          <line class="post" x1="72" y1="558" x2="72" y2="604"/>
+          <path class="glint" d="M42 8h24M8 130h26M8 344h26M8 558h26M8 772h26"/>
+          <ellipse class="glint" cx="42" cy="8" rx="4" ry="3"/>
+        </svg>
+        <article class="story-step"><span>01 · The beginning</span><h3>More than a name.</h3><p>RKH is a shared record of the people, stories, and small acts of excellence that give a community its identity.</p></article>
+        <article class="story-step"><span>02 · The meaning</span><h3>Recognition creates memory.</h3><p>Every nomination gives meaningful contribution a place in the collective story.</p></article>
+        <article class="story-step"><span>03 · The honour</span><h3>Carry it forward.</h3><p>The next chapter is shaped by all of us.</p></article>
+        <article class="story-step"><span>04 · The people</span><h3>See the work behind the name.</h3><p>Every story begins with a person whose effort leaves a mark.</p></article>
+      </div>
+      <div class="story-actions"><button class="primary" id="story-continue" type="button">Enter the categories →</button></div>
     </section>
     <section class="screen" id="categories-screen">
       <div class="topline"><p class="kicker">The ballot awaits</p><button class="back" id="sign-out" type="button">Exit ballot</button></div>
@@ -119,6 +175,7 @@
   <script>
     const screens = {
       access: document.querySelector("#access-screen"),
+      story: document.querySelector("#story-screen"),
       categories: document.querySelector("#categories-screen"),
       nominees: document.querySelector("#nominees-screen"),
       thankYou: document.querySelector("#thank-you-screen"),
@@ -231,7 +288,9 @@
       if (next >= 0) openNominees(next);
     });
     document.querySelector("#home").addEventListener("click", () => { sessionStorage.clear(); location.href = location.pathname; });
-    enterBallotButton.addEventListener("click", () => show("categories"));
+    enterBallotButton.addEventListener("click", () => show("story"));
+    document.querySelector("#story-back").addEventListener("click", () => show("access"));
+    document.querySelector("#story-continue").addEventListener("click", () => show("categories"));
     start();
   </script>
 </body>
