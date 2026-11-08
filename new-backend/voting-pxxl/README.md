@@ -84,8 +84,8 @@ It needs `out/links.csv` for test voters. Run it from a single machine only if y
 ## Cloudflare-only deployment
 
 The Cloudflare deployment uses one Worker for the SPA and API, D1 for the
-voter/vote tables, and R2 for nominee assets. The free `workers.dev` hostname
-is available immediately; `pxxl.pro` can be attached later as a custom domain.
+voter/vote tables, and R2 for nominee assets. The app uses only the free
+`workers.dev` hostname; no custom domain is required.
 The existing Express/Postgres server remains available for local development.
 
 1. Install dependencies with `npm install`, then authenticate once with
@@ -123,8 +123,9 @@ The existing Express/Postgres server remains available for local development.
    curl https://<worker>.<account>.workers.dev/healthz
    ```
 
-8. In Cloudflare, add `pxxl.pro` as a Worker custom domain. The R2 bucket must
-   use a different hostname, such as `assets.pxxl.pro`.
+8. Use the Worker URL shown by Wrangler, for example
+   `https://akoni-voting.<account>.workers.dev`. R2 is accessed through the
+   Worker at `/media/<filename>`, so no separate public R2 hostname is needed.
 
 The Worker reads the same `public/categories.json`, preserves the database
 unique constraints, returns `step:"complete"` after the final vote, and does
