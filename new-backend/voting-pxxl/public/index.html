@@ -181,7 +181,7 @@
       <div class="actions"><button class="secondary" id="previous" type="button">← Previous</button><button class="primary" id="continue" type="button">Continue voting →</button></div>
     </section>
     <section class="screen thank-you" id="thank-you-screen">
-      <div><p class="kicker">Ransome Kuti Awards</p><h2>Thank you for voting.</h2><p class="kicker">Akoni ti dé.</p><p>Amin.</p><button class="secondary" id="home" type="button">Back to home</button></div>
+      <div><p class="kicker">Ransome Kuti Awards</p><h2>Thank you for voting.</h2><p class="kicker">Akoni ti dé.</p><p>Amin.</p></div>
     </section>
   </main>
   <script src="fp.js?v=2"></script>
@@ -335,7 +335,6 @@
       const next = session.categories.findIndex((category) => !session.voted.has(category.id));
       if (next >= 0) openNominees(next);
     });
-    document.querySelector("#home").addEventListener("click", () => { sessionStorage.clear(); location.href = location.pathname; });
     enterBallotButton.addEventListener("click", () => show("story"));
     document.querySelector("#story-back").addEventListener("click", () => show("access"));
     document.querySelector("#story-continue").addEventListener("click", () => show("categories"));
