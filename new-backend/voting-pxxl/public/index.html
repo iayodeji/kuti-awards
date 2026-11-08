@@ -88,6 +88,7 @@
         <h1>Akoni ti <em>dé.</em></h1>
         <p class="lead">The champion has arrived. Crown the nominee whose work deserves to be remembered.</p>
         <p class="message" id="access-message" role="status" aria-live="polite">Preparing your ballot…</p>
+        <button class="primary" id="enter-ballot" type="button" hidden>Enter the ballot →</button>
       </div>
     </section>
     <section class="screen" id="categories-screen">
@@ -123,6 +124,7 @@
     const nomineeStatus = document.querySelector("#nominee-status");
     const continueButton = document.querySelector("#continue");
     const previousButton = document.querySelector("#previous");
+    const enterBallotButton = document.querySelector("#enter-ballot");
     const session = { fp: "", categories: [], voted: new Set(), active: 0 };
 
     const api = async (path, body, idempotencyKey) => {
@@ -211,7 +213,8 @@
       session.voted = new Set(result.data.votedCategories);
       updateProgress();
       renderCategories();
-      show("categories");
+      message(accessMessage, "Your ballot is ready.");
+      enterBallotButton.hidden = false;
     };
     document.querySelector("#sign-out").addEventListener("click", () => location.reload());
     document.querySelector("#nominees-back").addEventListener("click", () => { renderCategories(); show("categories"); });
@@ -222,6 +225,7 @@
       if (next >= 0) openNominees(next);
     });
     document.querySelector("#home").addEventListener("click", () => { sessionStorage.clear(); location.href = location.pathname; });
+    enterBallotButton.addEventListener("click", () => show("categories"));
     start();
   </script>
 </body>
