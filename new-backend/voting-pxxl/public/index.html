@@ -201,7 +201,7 @@
     const continueButton = document.querySelector("#continue");
     const previousButton = document.querySelector("#previous");
     const enterBallotButton = document.querySelector("#enter-ballot");
-    const session = { fp: "", categories: [], voted: new Set(), active: 0 };
+    const session = { fp: "", categories: [], voted: new Set(), active: 0, complete: false };
 
     const api = async (path, body, idempotencyKey) => {
       try {
@@ -213,7 +213,10 @@
         return { status: 0, data: { error: "network_error" } };
       }
     };
-    const show = (name) => Object.entries(screens).forEach(([key, screen]) => screen.classList.toggle("is-visible", key === name));
+    const show = (name) => {
+      const target = session.complete && name !== "thankYou" ? "thankYou" : name;
+      Object.entries(screens).forEach(([key, screen]) => screen.classList.toggle("is-visible", key === target));
+    };
     const message = (element, text) => { element.textContent = text; };
     const escapeHtml = (value) => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
     const portrait = (index, feminine) => {
@@ -269,8 +272,18 @@
       if (result.status !== 200) {
         continueButton.disabled = false;
         nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => { choice.disabled = false; });
+        if (result.data.error === "ballot_complete") {
+          session.complete = true;
+          show("thankYou");
+          return;
+        }
         if (result.data.error === "already_voted" || result.status === 0) {
           const refreshed = await api("session", { fp: session.fp });
+          if (refreshed.status === 200 && refreshed.data.step === "complete") {
+            session.complete = true;
+            show("thankYou");
+            return;
+          }
           if (refreshed.status === 200 && refreshed.data.step === "vote") {
             session.voted = new Set(refreshed.data.votedCategories);
             updateProgress();
@@ -286,7 +299,11 @@
       renderCategories();
       message(nomineeStatus, "Vote recorded. Moving to the next category…");
       continueButton.disabled = false;
-      if (result.data.allVoted) { continueButton.textContent = "Finish ballot →"; return; }
+      if (result.data.step === "complete" || result.data.allVoted) {
+        session.complete = true;
+        window.setTimeout(() => show("thankYou"), 800);
+        return;
+      }
       const next = session.categories.findIndex((item, index) => index > session.active && !session.voted.has(item.id));
       window.setTimeout(() => openNominees(next >= 0 ? next : session.categories.findIndex((item) => !session.voted.has(item.id))), 800);
     };
@@ -296,6 +313,12 @@
       if (result.status !== 200) { message(accessMessage, "We could not open the ballot. Please try again."); return; }
       if (result.data.state === "not_open") { message(accessMessage, "Voting has not opened yet."); return; }
       if (result.data.state === "closed") { message(accessMessage, "Voting has closed."); return; }
+      if (result.data.step === "complete") {
+        session.complete = true;
+        session.voted = new Set(result.data.votedCategories);
+        show("thankYou");
+        return;
+      }
       session.categories = result.data.categories;
       session.voted = new Set(result.data.votedCategories);
       updateProgress();
@@ -307,6 +330,7 @@
     document.querySelector("#nominees-back").addEventListener("click", () => { renderCategories(); show("categories"); });
     previousButton.addEventListener("click", () => openNominees(session.active - 1));
     continueButton.addEventListener("click", () => {
+      if (session.complete) { show("thankYou"); return; }
       if (session.voted.size === session.categories.length) { show("thankYou"); return; }
       const next = session.categories.findIndex((category) => !session.voted.has(category.id));
       if (next >= 0) openNominees(next);

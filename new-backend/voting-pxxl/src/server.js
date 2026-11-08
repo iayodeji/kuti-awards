@@ -109,14 +109,15 @@ const linkSession = wrap(async (req, res) => {
   if (!emailMatches(voter, body.email)) return res.status(403).json({ error: "email_mismatch" });
 
   const voted = await votedCategories(voter.id);
+  const allVoted = voted.length === CATEGORIES.length;
   res.json({
     ok: true,
-    step: "vote",
+    step: allVoted ? "complete" : "vote",
     state, // "not_open" | "open" | "closed"
     needsEmail: requireEmail,
     votedCategories: voted,
-    allVoted: voted.length === CATEGORIES.length,
-    categories: CATEGORIES,
+    allVoted,
+    categories: allVoted ? [] : CATEGORIES,
   });
 });
 
@@ -148,6 +149,7 @@ const linkVote = wrap(async (req, res) => {
 
   // Friendly pre-check (the primary key is the real guard against races)
   const already = await votedCategories(voter.id);
+  if (already.length === CATEGORIES.length) return res.status(409).json({ error: "ballot_complete" });
   const dupes = entries.map(([c]) => c).filter((c) => already.includes(c));
   if (dupes.length) return res.status(409).json({ error: "already_voted", categories: dupes });
 
@@ -158,7 +160,8 @@ const linkVote = wrap(async (req, res) => {
     throw e;
   }
   const voted = already.concat(entries.map(([c]) => c));
-  res.json({ ok: true, votedCategories: voted, allVoted: voted.length === CATEGORIES.length });
+  const allVoted = voted.length === CATEGORIES.length;
+  res.json({ ok: true, step: allVoted ? "complete" : "vote", votedCategories: voted, allVoted });
 });
 
 // =========================== DEVICE MODE (no email) ===================================
@@ -190,9 +193,10 @@ const deviceSession = wrap(async (req, res) => {
   const fp = req.body && req.body.fp;
   if (fp !== undefined && !(typeof fp === "string" && FP_RE.test(fp))) return res.status(400).json({ error: "bad_request" });
   const { voted } = await alreadyVoted(req, fp);
+  const allVoted = voted.length === CATEGORIES.length;
   res.json({
-    ok: true, step: "vote", state: votingState(win), needsEmail: false,
-    votedCategories: voted, allVoted: voted.length === CATEGORIES.length, categories: CATEGORIES,
+    ok: true, step: allVoted ? "complete" : "vote", state: votingState(win), needsEmail: false,
+    votedCategories: voted, allVoted, categories: allVoted ? [] : CATEGORIES,
   });
 });
 
@@ -219,6 +223,7 @@ const deviceVote = wrap(async (req, res) => {
   }
 
   const { voterId, voted } = await alreadyVoted(req, body.fp);
+  if (voted.length === CATEGORIES.length) return res.status(409).json({ error: "ballot_complete" });
   const dupes = entries.map(([c]) => c).filter((c) => voted.includes(c));
   if (dupes.length) return res.status(409).json({ error: "already_voted", categories: dupes });
 
@@ -238,7 +243,8 @@ const deviceVote = wrap(async (req, res) => {
   }
   res.set("Set-Cookie", cookieHeaderFor(voter.id));
   const all = voted.concat(entries.map(([c]) => c));
-  res.json({ ok: true, votedCategories: all, allVoted: all.length === CATEGORIES.length });
+  const allVoted = all.length === CATEGORIES.length;
+  res.json({ ok: true, step: allVoted ? "complete" : "vote", votedCategories: all, allVoted });
 });
 
 app.post("/api/session", smallJson, deviceMode ? deviceSession : linkSession);

@@ -62,8 +62,8 @@ ADMIN_KEY=<server ADMIN_KEY> node scripts/upload-voters.mjs https://your-app-or-
 
 ## UI contract
 
-- Device mode: `POST /api/session` `{fp?}` returns `{step:"vote", state, votedCategories, allVoted, categories}`.
-- Device mode: `POST /api/vote` `{fp, turnstile?, votes:{categoryId: nomineeId}}` returns 200, or 409 `already_voted`, 400 `invalid_choice`, 403 `closed`/`not_open`/`captcha_failed`, 429 `rate_limited`.
+- Device mode: `POST /api/session` `{fp?}` returns `{step:"vote", state, votedCategories, allVoted, categories}` while voting is incomplete. Once every category is recorded it returns `step:"complete"` and no nominee categories.
+- Device mode: `POST /api/vote` `{fp, turnstile?, votes:{categoryId: nomineeId}}` returns 200, or 409 `already_voted`/`ballot_complete`, 400 `invalid_choice`, 403 `closed`/`not_open`/`captcha_failed`, 429 `rate_limited`.
 - The UI is a single page. It renders categories and nominees from the server response and never navigates to another document.
 - Link mode remains available by setting `VOTER_MODE=link`; use the link-mode contract and token scripts only when emailed links are required.
 - Results: `GET /api/results` with header `x-admin-key`.
