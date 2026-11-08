@@ -84,7 +84,7 @@
     .check { display: block; margin-top: 7px; color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
     .nominee-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .nominee { text-align: center; }
-    .portrait { display: grid; place-items: end center; height: 250px; overflow: hidden; border: 1px solid rgba(223, 202, 138, .42); background: linear-gradient(145deg, rgba(74, 14, 23, .86), rgba(20, 7, 12, .7)); }
+    .portrait { display: grid; width: 100%; place-items: end center; height: 250px; overflow: hidden; border: 1px solid rgba(223, 202, 138, .42); background: linear-gradient(145deg, rgba(74, 14, 23, .86), rgba(20, 7, 12, .7)); }
     .portrait:hover, .portrait:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
     .portrait svg { width: 88%; height: 94%; }
     .rank { display: block; margin: 15px 0 5px; color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
@@ -114,8 +114,14 @@
       .story-staircase { min-height: 690px; padding-left: 42px; }
       .staircase-art { left: -8px; width: 62px; }
       .story-step, .story-step:nth-of-type(2), .story-step:nth-of-type(3), .story-step:nth-of-type(4) { margin-left: 0; padding-left: 20px; }
-      .nominee-grid { grid-template-columns: 1fr; gap: 30px; }
-      .portrait { height: 280px; }
+      .nominee-grid { grid-template-columns: 1fr; gap: 34px; }
+      .heading { margin: 34px 0 22px; }
+      .heading h2 { font-size: clamp(42px, 12vw, 64px); }
+      .heading p { margin-top: 14px; font-size: 14px; line-height: 1.55; }
+      .nominee-grid { padding: 0 4px; }
+      .portrait { width: min(100%, 300px); height: min(68vw, 260px); margin: 0 auto; }
+      .nominee h3 { font-size: clamp(25px, 7vw, 34px); }
+      .rank { margin-top: 12px; }
       .actions { align-items: stretch; }
       .actions .secondary, .actions .primary { flex: 1; }
     }
@@ -278,11 +284,11 @@
       session.voted = new Set(result.data.votedCategories);
       updateProgress();
       renderCategories();
-      message(nomineeStatus, "Vote recorded.");
+      message(nomineeStatus, "Vote recorded. Moving to the next category…");
       continueButton.disabled = false;
       if (result.data.allVoted) { continueButton.textContent = "Finish ballot →"; return; }
       const next = session.categories.findIndex((item, index) => index > session.active && !session.voted.has(item.id));
-      window.setTimeout(() => openNominees(next >= 0 ? next : session.categories.findIndex((item) => !session.voted.has(item.id))), 500);
+      window.setTimeout(() => openNominees(next >= 0 ? next : session.categories.findIndex((item) => !session.voted.has(item.id))), 800);
     };
     const start = async () => {
       session.fp = await getFingerprint();
