@@ -262,7 +262,7 @@
       nomineeTitle.textContent = category.name;
       nomineeStatus.textContent = "";
       const feminine = category.id === "kutiress-of-the-year";
-      nomineeGrid.innerHTML = category.nominees.map((nominee, nomineeIndex) => `<article class="nominee"><button class="portrait" type="button" data-id="${nominee.id}" aria-label="Vote for ${escapeHtml(nominee.name)}">${portrait(nomineeIndex, feminine, nominee.image)}</button><span class="rank">${["First choice", "Second choice", "Third choice"][nomineeIndex]}</span><h3>${escapeHtml(nominee.name)}</h3></article>`).join("");
+      nomineeGrid.innerHTML = category.nominees.map((nominee, nomineeIndex) => `<article class="nominee"><button class="portrait" type="button" data-id="${nominee.id}" aria-label="Vote for ${escapeHtml(nominee.name)}">${portrait(nomineeIndex, feminine, nominee.image)}</button><h3>${escapeHtml(nominee.name)}</h3></article>`).join("");
       nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => choice.addEventListener("click", () => castVote(category, choice.dataset.id)));
       previousButton.disabled = index === 0;
       continueButton.textContent = session.voted.has(category.id) ? (session.voted.size === session.categories.length ? "Finish ballot →" : "Next category →") : "Choose a nominee";
