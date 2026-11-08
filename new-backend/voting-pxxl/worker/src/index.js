@@ -1,4 +1,5 @@
 import categories from "../../public/categories.json";
+import nomineeImages from "../../public/nominee-images.json";
 
 const COOKIE = "akoni_vid";
 const FP_RE = /^[A-Za-z0-9_-]{16,128}$/;
@@ -25,6 +26,7 @@ function categoriesForClient() {
     nominees: category.nominees.map((name, index) => ({
       id: `${category.id}-${index + 1}`,
       name,
+      image: nomineeImages[name] || null,
     })),
   }));
 }

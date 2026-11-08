@@ -3,3 +3,4 @@ node_modules
 .wrangler
 out/
 voters.csv
+public/repicturesforwebsite/

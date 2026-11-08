@@ -87,6 +87,7 @@
     .portrait { display: grid; width: 100%; place-items: end center; height: 250px; overflow: hidden; border: 1px solid rgba(223, 202, 138, .42); background: linear-gradient(145deg, rgba(74, 14, 23, .86), rgba(20, 7, 12, .7)); }
     .portrait:hover, .portrait:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
     .portrait svg { width: 88%; height: 94%; }
+    .portrait img { width: 100%; height: 100%; object-fit: cover; }
     .rank { display: block; margin: 15px 0 5px; color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
     .nominee h3 { margin: 0; font-size: 26px; line-height: 1; }
     .nominee .primary { margin-top: 12px; padding: 10px 12px; }
@@ -219,7 +220,8 @@
     };
     const message = (element, text) => { element.textContent = text; };
     const escapeHtml = (value) => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
-    const portrait = (index, feminine) => {
+    const portrait = (index, feminine, image) => {
+      if (image) return `<img src="${escapeHtml(image)}" alt="Nominee portrait" loading="lazy">`;
       const skin = feminine ? "#b9795d" : ["#a8644f", "#c68161", "#8e4e40"][index];
       const shirt = ["#6b1828", "#332033", "#75602e"][index];
       return `<svg viewBox="0 0 180 230" role="img" aria-label="Illustrated nominee portrait"><path d="M25 230c4-48 24-70 65-70s61 22 65 70" fill="${shirt}"/><path d="M73 151h34l10 34H63z" fill="${skin}"/><ellipse cx="90" cy="104" rx="43" ry="53" fill="${skin}"/><path d="M47 102c-4-48 18-75 45-75 33 0 47 28 41 74-11-18-24-25-43-25-19 0-30 9-43 26Z" fill="#171016"/><circle cx="74" cy="105" r="4" fill="#171016"/><circle cx="106" cy="105" r="4" fill="#171016"/><path d="M79 132c8 5 16 5 24 0" fill="none" stroke="#542d2b" stroke-width="3" stroke-linecap="round"/></svg>`;
@@ -255,7 +257,7 @@
       nomineeTitle.textContent = category.name;
       nomineeStatus.textContent = "";
       const feminine = category.id === "kutiress-of-the-year";
-      nomineeGrid.innerHTML = category.nominees.map((nominee, nomineeIndex) => `<article class="nominee"><button class="portrait" type="button" data-id="${nominee.id}" aria-label="Vote for ${escapeHtml(nominee.name)}">${portrait(nomineeIndex, feminine)}</button><span class="rank">${["First choice", "Second choice", "Third choice"][nomineeIndex]}</span><h3>${escapeHtml(nominee.name)}</h3></article>`).join("");
+      nomineeGrid.innerHTML = category.nominees.map((nominee, nomineeIndex) => `<article class="nominee"><button class="portrait" type="button" data-id="${nominee.id}" aria-label="Vote for ${escapeHtml(nominee.name)}">${portrait(nomineeIndex, feminine, nominee.image)}</button><span class="rank">${["First choice", "Second choice", "Third choice"][nomineeIndex]}</span><h3>${escapeHtml(nominee.name)}</h3></article>`).join("");
       nomineeGrid.querySelectorAll("[data-id]").forEach((choice) => choice.addEventListener("click", () => castVote(category, choice.dataset.id)));
       previousButton.disabled = index === 0;
       continueButton.textContent = session.voted.has(category.id) ? (session.voted.size === session.categories.length ? "Finish ballot →" : "Next category →") : "Choose a nominee";
