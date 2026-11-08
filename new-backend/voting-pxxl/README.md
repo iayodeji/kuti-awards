@@ -80,3 +80,52 @@ It needs `out/links.csv` for test voters. Run it from a single machine only if y
 
 - Rate limiters are in memory, so run a single instance. Votes stay correct with several instances; only the limits become per-instance.
 - Before the real run, clear test data: `TRUNCATE votes, voters RESTART IDENTITY CASCADE;`
+
+## Cloudflare-only deployment
+
+The Cloudflare deployment uses one Worker for the SPA and API, D1 for the
+voter/vote tables, and R2 for nominee assets. The free `workers.dev` hostname
+is available immediately; `pxxl.pro` can be attached later as a custom domain.
+The existing Express/Postgres server remains available for local development.
+
+1. Install dependencies with `npm install`, then authenticate once with
+   `npx wrangler login`.
+2. Create the D1 database and copy its ID:
+
+   ```
+   npx wrangler d1 create akoni-voting
+   ```
+
+3. Create or choose an R2 bucket, then replace `database_id` and `bucket_name`
+   in `wrangler.toml`.
+4. Apply the schema:
+
+   ```
+   npx wrangler d1 migrations apply akoni-voting --remote
+   ```
+
+5. Set secrets. Do not commit them:
+
+   ```
+   npx wrangler secret put COOKIE_SECRET
+   npx wrangler secret put ADMIN_KEY
+   npx wrangler secret put TURNSTILE_SECRET
+   ```
+
+   `TURNSTILE_SECRET` is optional while testing. Configure a Turnstile widget
+   in the frontend before setting it for production.
+6. Put nominee images in the R2 `nominees/` prefix. The Worker exposes them at
+   `/media/<filename>` through the `IMAGES` binding.
+7. Deploy and test:
+
+   ```
+   npm run cf:deploy
+   curl https://<worker>.<account>.workers.dev/healthz
+   ```
+
+8. In Cloudflare, add `pxxl.pro` as a Worker custom domain. The R2 bucket must
+   use a different hostname, such as `assets.pxxl.pro`.
+
+The Worker reads the same `public/categories.json`, preserves the database
+unique constraints, returns `step:"complete"` after the final vote, and does
+not return nominee data for completed ballots.

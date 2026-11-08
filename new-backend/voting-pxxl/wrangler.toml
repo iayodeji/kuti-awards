@@ -1,0 +1,25 @@
+name = "akoni-voting"
+main = "worker/src/index.js"
+compatibility_date = "2026-11-08"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*", "/healthz", "/media/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "akoni-voting"
+database_id = "00000000-0000-0000-0000-000000000000" # Replace with the ID from `wrangler d1 create akoni-voting`
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "akoni-images" # Replace with your existing R2 bucket name
+
+[vars]
+VOTER_MODE = "device"
+IP_BALLOT_CAP = "1000"
+VOTING_OPENS = ""
+VOTING_CLOSES = ""
+R2_PREFIX = "nominees/"
