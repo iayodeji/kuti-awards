@@ -20,8 +20,9 @@
     button { cursor: pointer; }
     button:disabled { cursor: not-allowed; opacity: .42; }
     .shell { width: min(100%, 980px); min-height: 100vh; margin: 0 auto; padding: 34px 22px 64px; }
-    .screen { display: none; }
-    .screen.is-visible { display: block; }
+    .screen { display: none !important; }
+    .screen.is-visible { display: block !important; }
+    .screen.is-visible.access, .screen.is-visible.thank-you { display: grid !important; }
     .access { display: grid; min-height: calc(100vh - 98px); place-items: center; text-align: center; }
     .access-inner { width: min(100%, 430px); }
     .eyebrow, .kicker { margin: 0 0 12px; color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
