@@ -14,7 +14,6 @@ Two modes, chosen with `VOTER_MODE`:
 How a ballot is limited, strongest first:
 1. **Fingerprint, enforced by the database.** A unique index on (category, fingerprint hash) means a cleared cookie or incognito window on the same browser is rejected (409), even under a race.
 2. **Signed HttpOnly cookie.** Remembers the device and lets the UI show "you have voted".
-3. **Turnstile** (set `TURNSTILE_SECRET`): stops simple scripts. The server warns at boot if it is missing.
 4. **Per-IP ballot cap** (`IP_BALLOT_CAP`, soft): bounds how much one network can add.
 
 Honest limits:
@@ -23,7 +22,7 @@ Honest limits:
 - Two real people on identical phones can produce the same fingerprint, and the second would be blocked. Keep the fingerprint coarse; do not add noisy signals.
 - Fingerprints and IPs are stored only as keyed hashes. Tell voters you do this.
 
-UI contract in device mode (no token, no email): send `fp` (from `public/fp.js`) to `POST /api/session` and `POST /api/vote`, and send `turnstile` with the vote. `/api/session` also reports categories already voted for from that fingerprint. Host the UI on the same domain as this app if you can (cookies are simplest); if not, set `CORS_ORIGIN` and call `fetch` with `credentials: "include"`.
+UI contract in device mode (no token, no email): send `fp` (from `public/fp.js`) to `POST /api/session` and `POST /api/vote`. `/api/session` also reports categories already voted for from that fingerprint. Host the UI on the same domain as this app if you can (cookies are simplest); if not, set `CORS_ORIGIN` and call `fetch` with `credentials: "include"`.
 
 Tests: `node scripts/loadtest-device.mjs http://localhost:3000 600`.
 
@@ -45,7 +44,7 @@ Verified locally (Node 18+, Postgres): 600 voters each firing the same ballot tw
 1. Edit `src/config.js` with the real categories and nominees (ids are permanent once voting starts).
 2. Push this folder to a GitHub repo (`.env`, `out/`, `voters.csv` are already git-ignored).
 3. In Pxxl: create a Node app from the repo, build command `npm install`, start command `npm start`. Create the database and copy its connection string.
-4. Set environment variables (see `.env.example`): `DATABASE_URL`, `DATABASE_SSL`, `DB_POOL_MAX`, `EMAIL_PEPPER`, `ADMIN_KEY` (use `openssl rand -hex 32`), `VOTING_OPENS`, `VOTING_CLOSES`. Optional: `TURNSTILE_SECRET`, `CORS_ORIGIN`.
+4. Set environment variables (see `.env.example`): `DATABASE_URL`, `DATABASE_SSL`, `DB_POOL_MAX`, `EMAIL_PEPPER`, `ADMIN_KEY` (use `openssl rand -hex 32`), `VOTING_OPENS`, `VOTING_CLOSES`, `CORS_ORIGIN`.
 5. Open `https://your-app/healthz`. It should say `ok`. Tables are created automatically on first boot.
 
 ## Issue links
@@ -63,7 +62,7 @@ ADMIN_KEY=<server ADMIN_KEY> node scripts/upload-voters.mjs https://your-app-or-
 ## UI contract
 
 - Device mode: `POST /api/session` `{fp?}` returns `{step:"vote", state, votedCategories, allVoted, categories}` while voting is incomplete. Once every category is recorded it returns `step:"complete"` and no nominee categories.
-- Device mode: `POST /api/vote` `{fp, turnstile?, votes:{categoryId: nomineeId}}` returns 200, or 409 `already_voted`/`ballot_complete`, 400 `invalid_choice`, 403 `closed`/`not_open`/`captcha_failed`, 429 `rate_limited`.
+- Device mode: `POST /api/vote` `{fp, votes:{categoryId: nomineeId}}` returns 200, or 409 `already_voted`/`ballot_complete`, 400 `invalid_choice`, 403 `closed`/`not_open`, 429 `rate_limited`.
 - The UI is a single page. It renders categories and nominees from the server response and never navigates to another document.
 - Link mode remains available by setting `VOTER_MODE=link`; use the link-mode contract and token scripts only when emailed links are required.
 - Results: `GET /api/results` with header `x-admin-key`.
@@ -109,13 +108,10 @@ The existing Express/Postgres server remains available for local development.
    ```
    npx wrangler secret put COOKIE_SECRET
    npx wrangler secret put ADMIN_KEY
-   npx wrangler secret put TURNSTILE_SECRET
    ```
 
-   Set the public widget key in `wrangler.toml` as `TURNSTILE_SITE_KEY`.
-   `TURNSTILE_SECRET` must remain a Worker secret; never put it in the frontend.
-   The local Express preview leaves the widget disabled and serves mapped images
-   from `public/repicturesforwebsite/`.
+   The local Express preview serves mapped images from
+   `public/repicturesforwebsite/`.
 6. Put nominee images in the R2 `nominees/` prefix. The Worker exposes them at
    `/media/<filename>` through the `IMAGES` binding.
 7. Deploy and test:

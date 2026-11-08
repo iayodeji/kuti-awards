@@ -9,7 +9,7 @@ import {
 } from "./db.js";
 import {
   sha256Hex, hmacHex, safeEqual, TOKEN_RE, HEX64_RE, FP_RE, signVoterId, readVoterId,
-  parseWindow, votingState, verifyTurnstile, makeLimiter,
+  parseWindow, votingState, makeLimiter,
 } from "./lib.js";
 
 const env = process.env;
@@ -121,7 +121,7 @@ const linkSession = wrap(async (req, res) => {
   });
 });
 
-// ---- POST /api/vote  { token, email?, turnstile?, votes: { categoryId: nomineeId } } --
+// ---- POST /api/vote  { token, email?, votes: { categoryId: nomineeId } } --
 const linkVote = wrap(async (req, res) => {
   const body = req.body;
   if (!body || typeof body.votes !== "object" || body.votes === null || Array.isArray(body.votes)) {
@@ -133,10 +133,6 @@ const linkVote = wrap(async (req, res) => {
   const voter = await authenticate(req, res, body);
   if (!voter) return;
   if (!emailMatches(voter, body.email)) return res.status(403).json({ error: "email_mismatch" });
-  if (!(await verifyTurnstile(env.TURNSTILE_SECRET, body.turnstile, req.ip))) {
-    return res.status(403).json({ error: "captcha_failed" });
-  }
-
   // Validate every choice against the server-side config
   const entries = Object.entries(body.votes);
   if (entries.length === 0 || entries.length > CATEGORIES.length) return res.status(400).json({ error: "bad_request" });
@@ -200,7 +196,7 @@ const deviceSession = wrap(async (req, res) => {
   });
 });
 
-// POST /api/vote  { fp, turnstile?, votes: { categoryId: nomineeId } }
+// POST /api/vote  { fp, votes: { categoryId: nomineeId } }
 const deviceVote = wrap(async (req, res) => {
   const body = req.body;
   if (!body || typeof body.votes !== "object" || body.votes === null || Array.isArray(body.votes)) {
@@ -209,10 +205,6 @@ const deviceVote = wrap(async (req, res) => {
   const state = votingState(win);
   if (state !== "open") return res.status(403).json({ error: state });
   if (typeof body.fp !== "string" || !FP_RE.test(body.fp)) return res.status(400).json({ error: "bad_fingerprint" });
-  if (!(await verifyTurnstile(env.TURNSTILE_SECRET, body.turnstile, req.ip))) {
-    return res.status(403).json({ error: "captcha_failed" });
-  }
-
   const entries = Object.entries(body.votes);
   if (entries.length === 0 || entries.length > CATEGORIES.length) return res.status(400).json({ error: "bad_request" });
   for (const [catId, nomId] of entries) {
@@ -314,9 +306,6 @@ app.use((err, req, res, next) => {
 // ---- boot -----------------------------------------------------------------------------
 const port = Number(env.PORT || 3000);
 await initSchema();
-if (deviceMode && !env.TURNSTILE_SECRET) {
-  console.warn("WARNING: device mode without TURNSTILE_SECRET. Anyone can script votes. Set it before launch.");
-}
 console.log(`mode: ${deviceMode ? "device (no email)" : "link"}`);
 const server = app.listen(port, "0.0.0.0", () => console.log(`voting backend listening on :${port}`));
 server.keepAliveTimeout = 65_000; // longer than typical proxy idle timeouts

@@ -31,25 +31,6 @@ export function votingState(win, now = Date.now()) {
   return "open";
 }
 
-export async function verifyTurnstile(secret, token, ip) {
-  if (!secret) return true; // not configured -> skipped
-  if (typeof token !== "string" || !token || token.length > 2048) return false;
-  try {
-    const form = new URLSearchParams({ secret, response: token });
-    if (ip) form.set("remoteip", ip);
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      body: form,
-      signal: AbortSignal.timeout(5000),
-    });
-    const data = await res.json();
-    return data.success === true;
-  } catch (e) {
-    console.error("turnstile check failed:", e.message);
-    return false; // fail closed
-  }
-}
-
 // Fixed-window counter. Returns true if the call is allowed.
 export function makeLimiter(max, windowMs) {
   const hits = new Map();

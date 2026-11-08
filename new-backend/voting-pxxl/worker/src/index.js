@@ -90,14 +90,6 @@ function validEntries(votes) {
   return entries;
 }
 
-async function verifyTurnstile(env, token, ip) {
-  if (!env.TURNSTILE_SECRET) return true;
-  if (typeof token !== "string" || !token || token.length > 2048) return false;
-  const form = new URLSearchParams({ secret: env.TURNSTILE_SECRET, response: token, remoteip: ip });
-  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
-  return (await response.json()).success === true;
-}
-
 async function handleSession(request, env) {
   const body = await request.json().catch(() => ({}));
   const fp = body.fp;
@@ -115,16 +107,11 @@ async function handleSession(request, env) {
   });
 }
 
-function handleConfig(env) {
-  return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY || "" }, 200, { "cache-control": "public, max-age=300" });
-}
-
 async function handleVote(request, env) {
   const body = await request.json().catch(() => null);
   if (!validBody(body)) return json({ error: "bad_request" }, 400);
   if (state(env) !== "open") return json({ error: state(env) }, 403);
   if (typeof body.fp !== "string" || !FP_RE.test(body.fp)) return json({ error: "bad_fingerprint" }, 400);
-  if (!(await verifyTurnstile(env, body.turnstile, clientIp(request)))) return json({ error: "captcha_failed" }, 403);
   const entries = validEntries(body.votes);
   if (!entries) return json({ error: "invalid_choice" }, 400);
   const current = await alreadyVoted(request, env, body.fp);
@@ -190,7 +177,6 @@ export default {
     if (url.pathname === "/healthz") return new Response("ok", { headers: { "content-type": "text/plain", "cache-control": "no-store" } });
     if (url.pathname.startsWith("/media/")) return handleMedia(request, env);
     if (url.pathname === "/api/session" && request.method === "POST") return handleSession(request, env);
-    if (url.pathname === "/api/config" && request.method === "GET") return handleConfig(env);
     if (url.pathname === "/api/vote" && request.method === "POST") return handleVote(request, env);
     if (url.pathname === "/api/results" && request.method === "GET") return handleResults(request, env);
     if (url.pathname.startsWith("/api/")) return json({ error: "not_found" }, 404);
