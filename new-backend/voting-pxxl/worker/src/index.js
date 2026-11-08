@@ -115,6 +115,10 @@ async function handleSession(request, env) {
   });
 }
 
+function handleConfig(env) {
+  return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY || "" }, 200, { "cache-control": "public, max-age=300" });
+}
+
 async function handleVote(request, env) {
   const body = await request.json().catch(() => null);
   if (!validBody(body)) return json({ error: "bad_request" }, 400);
@@ -186,6 +190,7 @@ export default {
     if (url.pathname === "/healthz") return new Response("ok", { headers: { "content-type": "text/plain", "cache-control": "no-store" } });
     if (url.pathname.startsWith("/media/")) return handleMedia(request, env);
     if (url.pathname === "/api/session" && request.method === "POST") return handleSession(request, env);
+    if (url.pathname === "/api/config" && request.method === "GET") return handleConfig(env);
     if (url.pathname === "/api/vote" && request.method === "POST") return handleVote(request, env);
     if (url.pathname === "/api/results" && request.method === "GET") return handleResults(request, env);
     if (url.pathname.startsWith("/api/")) return json({ error: "not_found" }, 404);

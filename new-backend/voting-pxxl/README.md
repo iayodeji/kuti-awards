@@ -112,8 +112,10 @@ The existing Express/Postgres server remains available for local development.
    npx wrangler secret put TURNSTILE_SECRET
    ```
 
-   `TURNSTILE_SECRET` is optional while testing. Configure a Turnstile widget
-   in the frontend before setting it for production.
+   Set the public widget key in `wrangler.toml` as `TURNSTILE_SITE_KEY`.
+   `TURNSTILE_SECRET` must remain a Worker secret; never put it in the frontend.
+   The local Express preview leaves the widget disabled and serves mapped images
+   from `public/repicturesforwebsite/`.
 6. Put nominee images in the R2 `nominees/` prefix. The Worker exposes them at
    `/media/<filename>` through the `IMAGES` binding.
 7. Deploy and test:
