@@ -87,7 +87,7 @@
     .portrait { display: grid; width: 100%; place-items: end center; height: 250px; overflow: hidden; border: 1px solid rgba(223, 202, 138, .42); background: linear-gradient(145deg, rgba(74, 14, 23, .86), rgba(20, 7, 12, .7)); }
     .portrait:hover, .portrait:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
     .portrait svg { width: 88%; height: 94%; }
-    .portrait img { width: 100%; height: 100%; object-fit: cover; }
+    .portrait img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
     .rank { display: block; margin: 15px 0 5px; color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
     .nominee h3 { margin: 0; font-size: 26px; line-height: 1; }
     .nominee .primary { margin-top: 12px; padding: 10px 12px; }
@@ -170,13 +170,13 @@
     <section class="screen" id="categories-screen">
       <div class="topline"><p class="kicker">The ballot awaits</p><button class="back" id="sign-out" type="button">Exit ballot</button></div>
       <header class="heading"><h2>Choose what to honour.</h2><p>Move through each category with intention. Every selection is a small record of the people who make this community matter.</p></header>
-      <div class="progress" aria-label="Voting progress"><div class="progress-meta"><span id="category-progress">0 of 20 categories voted</span><span id="category-percent">0%</span></div><div class="track"><div class="value" id="category-value"></div></div></div>
+      <div class="progress" aria-label="Voting progress"><div class="progress-meta"><span id="category-progress">0 of 23 categories voted</span><span id="category-percent">0%</span></div><div class="track"><div class="value" id="category-value"></div></div></div>
       <div class="category-list" id="category-list"></div>
     </section>
     <section class="screen" id="nominees-screen">
       <button class="back" id="nominees-back" type="button">← Back to categories</button>
       <header class="heading"><p class="kicker">The nominees</p><h2 id="nominee-title"></h2><p>Three names. One vote. Select the person whose contribution stands out to you.</p></header>
-      <div class="progress" aria-label="Voting progress"><div class="progress-meta"><span id="nominee-progress">0 of 20 categories voted</span><span id="nominee-percent">0%</span></div><div class="track"><div class="value" id="nominee-value"></div></div></div>
+      <div class="progress" aria-label="Voting progress"><div class="progress-meta"><span id="nominee-progress">0 of 23 categories voted</span><span id="nominee-percent">0%</span></div><div class="track"><div class="value" id="nominee-value"></div></div></div>
       <div class="nominee-grid" id="nominee-grid"></div>
       <p class="status" id="nominee-status" role="status" aria-live="polite"></p>
       <div class="actions"><button class="secondary" id="previous" type="button">← Previous</button><button class="primary" id="continue" type="button">Continue voting →</button></div>
@@ -220,6 +220,10 @@
     };
     const message = (element, text) => { element.textContent = text; };
     const escapeHtml = (value) => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
+    const normalizeVoted = (votedIds) => {
+      const validIds = new Set(session.categories.map((category) => category.id));
+      return new Set(votedIds.filter((categoryId) => validIds.has(categoryId)));
+    };
     const shuffleNominees = (nominees, seedText) => {
       let seed = 2166136261;
       for (const character of seedText) {
@@ -250,8 +254,8 @@
       return `<svg viewBox="0 0 180 230" role="img" aria-label="Illustrated nominee portrait"><path d="M25 230c4-48 24-70 65-70s61 22 65 70" fill="${shirt}"/><path d="M73 151h34l10 34H63z" fill="${skin}"/><ellipse cx="90" cy="104" rx="43" ry="53" fill="${skin}"/><path d="M47 102c-4-48 18-75 45-75 33 0 47 28 41 74-11-18-24-25-43-25-19 0-30 9-43 26Z" fill="#171016"/><circle cx="74" cy="105" r="4" fill="#171016"/><circle cx="106" cy="105" r="4" fill="#171016"/><path d="M79 132c8 5 16 5 24 0" fill="none" stroke="#542d2b" stroke-width="3" stroke-linecap="round"/></svg>`;
     };
     const updateProgress = () => {
-      const count = session.voted.size;
-      const percent = Math.round((count / session.categories.length) * 100);
+      const count = Math.min(session.voted.size, session.categories.length);
+      const percent = session.categories.length ? Math.min(100, Math.round((count / session.categories.length) * 100)) : 0;
       document.querySelector("#category-progress").textContent = `${count} of ${session.categories.length} categories voted`;
       document.querySelector("#category-percent").textContent = `${percent}%`;
       document.querySelector("#category-value").style.width = `${percent}%`;
@@ -311,7 +315,7 @@
             return;
           }
           if (refreshed.status === 200 && refreshed.data.step === "vote") {
-            session.voted = new Set(refreshed.data.votedCategories);
+            session.voted = normalizeVoted(refreshed.data.votedCategories);
             updateProgress();
             renderCategories();
           }
@@ -320,7 +324,7 @@
         message(nomineeStatus, errors[result.data.error] || "We could not record that vote. Please try again.");
         return;
       }
-      session.voted = new Set(result.data.votedCategories);
+      session.voted = normalizeVoted(result.data.votedCategories);
       updateProgress();
       renderCategories();
       message(nomineeStatus, "Vote recorded. Moving to the next category…");
@@ -341,12 +345,12 @@
       if (result.data.state === "closed") { message(accessMessage, "Voting has closed."); return; }
       if (result.data.step === "complete") {
         session.complete = true;
-        session.voted = new Set(result.data.votedCategories);
+        session.voted = normalizeVoted(result.data.votedCategories);
         show("thankYou");
         return;
       }
       session.categories = result.data.categories;
-      session.voted = new Set(result.data.votedCategories);
+      session.voted = normalizeVoted(result.data.votedCategories);
       updateProgress();
       renderCategories();
       message(accessMessage, "Your ballot is ready.");
