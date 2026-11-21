@@ -679,6 +679,14 @@
       height: 94%;
     }
 
+    .portrait-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 22%;
+    }
+
     .nominee-rank {
       display: block;
       margin: 16px 0 5px;
@@ -998,24 +1006,13 @@
     <section class="access-card" aria-labelledby="page-title">
       <p class="eyebrow">Hall of Honour · 2024</p>
       <h1 id="page-title">Ransome Kuti <em>Awards</em></h1>
-      <p class="intro">Please enter your vote token.</p>
+      <p class="intro">The chamber is open. Step inside and cast your vote.</p>
 
       <form id="access-form">
-        <svg class="token-cue" viewBox="0 0 48 58" aria-hidden="true">
-          <path d="M24 5c0 11 1 17 1 29"/>
-          <path d="m17 27 8 7 8-7"/>
-          <circle cx="24" cy="5" r="3"/>
-        </svg>
-        <div class="token-wrap">
-          <input id="token" name="token" type="text" inputmode="text" autocomplete="off"
-            placeholder="Type token here" required>
-          <span class="token-icon" aria-hidden="true">⌾</span>
-        </div>
         <button class="submit" type="submit">Enter chambers <span aria-hidden="true">→</span></button>
         <p class="status" id="status" role="status" aria-live="polite"></p>
       </form>
 
-      <p class="footer">Need assistance with your passcode?</p>
     </section>
     <section class="page-two" aria-labelledby="story-title">
       <header class="page-two-header">
@@ -1156,7 +1153,6 @@
   </div>
   <script>
     const form = document.querySelector('#access-form');
-    const token = document.querySelector('#token');
     const status = document.querySelector('#status');
     const page = document.querySelector('.page');
     const accessCard = document.querySelector('.access-card');
@@ -1201,6 +1197,70 @@
       ['Kutiress of the Year', ['His Favourite Girl', 'Olabisi', 'Testimony']]
     ];
 
+    const nomineeImages = {
+      "Rikash Design": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/rikash-design.jpeg",
+      "Donald Dominion (Khushy)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/khushy.jpeg",
+      "Nuren Abdullahi (Amiable)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/amiable.jpeg",
+      "Health Committee": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/health-committee.jpeg",
+      "Sports Committee": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/sports-committee.jpeg",
+      "Arinola Isaac": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/arinola-issac.jpeg",
+      "B6 Boys": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/b6%20boys.jpeg",
+      "Oyinlade Bakare (Lade)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/lade.jpeg",
+      "Ogunkola Jedidiah (Jedex)": "https://pub-4aae9f94899a48f794825392e01fce9a.r2.dev/nominees/jedex.jpg",
+      "Simunyo Segun Michael (Tempeny)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/tempeny.jpeg",
+      "Omomurewa Samuel (Mr Who)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/mr-who.jpeg",
+      "David Onyeji": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/david-onyeji.jpeg",
+      "Gordon Adiele Eze": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/gordon.jpeg",
+      "Hon Wisdom Okojie": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/hon-wisdom.jpeg",
+      "DesignPlusAfrica": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/hon-wisdom.jpeg",
+      "Iretomiwa Maforikan": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/ire-picture.jpg",
+      "Oyelakin Emmanuel (Yaga)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/yaga.jpeg",
+      "YG COLLECTIVES": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/yg-collectives.jpeg",
+      "Adedugbe Adeyinka (Powerhouse)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/adeyinka.jpeg",
+      "Franky": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/franky.jpg",
+      "Testimony": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/testimony.jpg",
+      "His Favourite Girl": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/his-fave-gal.jpeg",
+      "Ogunsanwo Oluwasinaayomi": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/sina.jpeg",
+      "Okolie Chidera (Dr Carbon)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/dr-carbon.jpg",
+      "Sanusi Samuel (Sanzz)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/sannz.jpg",
+      "Olanrewaju David (Dave)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/dave.jpg",
+      "Odunaike Idris (KG)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/idris.jpeg",
+      "Ayelara Boluwatife": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/bolu.jpeg",
+      "Fate": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/fate.jpg",
+      "Wisdom Heritage": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/wisdom-heritage.jpg",
+      "Ogbonna Ugochukwu Henry (Cartel)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/cartel.jpeg",
+      "Obinna Kingsley Igwe": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/obina.png",
+      "Olakulehin": "https://pub-4aae9f94899a48f794825392e01fce9a.r2.dev/nominees/olakulehin.jpg",
+      "Elder Olakulehin Adebusuyi": "https://pub-4aae9f94899a48f794825392e01fce9a.r2.dev/nominees/olakulehin.jpg",
+      "Omotosho Olayinka (Banfo)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/banfo.jpeg",
+      "Kash Collection": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/kash-collection.jpg",
+      "Olaniyan Abdulateef Oladimeji (Lasco)": "https://pub-4aae9f94899a48f794825392e01fce9a.r2.dev/nominees/lasco.jpg",
+      "Oluyomi David (Rhexx)": "https://pub-4aae9f94899a48f794825392e01fce9a.r2.dev/nominees/rhexx.jpg",
+      "Justice Atewe": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/justice.jpg",
+      "Hon OJo": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/ojo.jpeg",
+      "Yusuf Dheniyi (Dheniyi)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/dheniyi.jpeg",
+      "Altimate Design": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/altimate-creation.jpeg",
+      "Damilola Adedeji (DOD)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/dami.jpeg",
+      "Abiodun Gabriel": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/gabriel.jpeg",
+      "Bello Kehinde (Big Kenzo)": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/kenzo.jpeg",
+      "Mahrez": "https://akoni-voting.inioluwaayodeji870.workers.dev/media/mahrez.jpeg",
+      "Samuel Binuyo": "https://pub-4aae9f94899a48f794825392e01fce9a.r2.dev/nominees/binuyo.jpg",
+      "Isabella": "https://pub-4aae9f94899a48f794825392e01fce9a.r2.dev/nominees/isabella.jpg"
+    };
+
+    const normalizeName = (value) => value.toLowerCase().replace(/[()]/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
+
+    const imageLookup = Object.entries(nomineeImages).map(([key, url]) => ({ normalized: normalizeName(key), url }));
+
+    const resolveImage = (name) => {
+      const target = normalizeName(name);
+      if (!target) return null;
+      const exact = imageLookup.find((entry) => entry.normalized === target);
+      if (exact) return exact.url;
+      const matches = imageLookup.filter((entry) => ` ${entry.normalized} `.includes(` ${target} `));
+      return matches.length === 1 ? matches[0].url : null;
+    };
+
     const escapeHtml = (value) => value.replace(/[&<>"']/g, (character) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
     }[character]));
@@ -1219,6 +1279,13 @@
       </svg>`;
     };
 
+    const portraitMarkup = (name, index, feminine) => {
+      const image = resolveImage(name);
+      return image
+        ? `<img src="${image}" alt="${escapeHtml(name)}" loading="lazy" referrerpolicy="no-referrer">`
+        : portraitSvg(index, feminine);
+    };
+
     const showNominees = (categoryIndex) => {
       const [category, names] = categoryData[categoryIndex];
       const feminine = category === 'Kutiress of the Year';
@@ -1229,7 +1296,7 @@
         : '';
       nomineeGrid.innerHTML = names.map((name, index) => `
         <article class="nominee">
-          <div class="portrait-frame" role="button" tabindex="0" aria-label="Vote for ${escapeHtml(name)}" data-nominee="${escapeHtml(name)}">${portraitSvg(index, feminine)}</div>
+          <div class="portrait-frame" role="button" tabindex="0" aria-label="Vote for ${escapeHtml(name)}" data-nominee="${escapeHtml(name)}">${portraitMarkup(name, index, feminine)}</div>
           <span class="nominee-rank">${['First choice', 'Second choice', 'Third choice'][index]}</span>
           <h3>${escapeHtml(name)}</h3>
           <button class="nominee-vote${votedCategories.get(categoryIndex) === name ? ' is-selected' : ''}" type="button" data-nominee="${escapeHtml(name)}">${votedCategories.get(categoryIndex) === name ? 'Vote recorded' : 'Vote for this nominee'}</button>
@@ -1286,10 +1353,6 @@
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      if (!token.value.trim()) {
-        status.textContent = 'Enter your hall vote token to continue.';
-        return;
-      }
       accessCard.hidden = true;
       page.classList.add('page-two-mode');
       pageTwo.classList.add('is-visible');
@@ -1351,7 +1414,6 @@
       pageThree.classList.remove('is-visible');
       pageFour.classList.remove('is-visible');
       accessCard.hidden = false;
-      token.value = '';
       status.textContent = '';
       votedCategories.clear();
       updateProgress();
