@@ -184,6 +184,9 @@
     <section class="screen thank-you" id="thank-you-screen">
       <div><p class="kicker">Ransome Kuti Awards</p><h2>Thank you for voting.</h2><p class="kicker">Akoni ti dé.</p><p>Amin.</p></div>
     </section>
+    <section class="screen thank-you" id="closed-screen">
+      <div><p class="kicker">Ransome Kuti Awards</p><h2>Your voice has been heard.</h2><p class="kicker">Voting has ended.</p><p class="kicker">Akoni ti dé.</p></div>
+    </section>
   </main>
   <script src="fp.js?v=2"></script>
   <script>
@@ -193,6 +196,7 @@
       categories: document.querySelector("#categories-screen"),
       nominees: document.querySelector("#nominees-screen"),
       thankYou: document.querySelector("#thank-you-screen"),
+      closed: document.querySelector("#closed-screen"),
     };
     const accessMessage = document.querySelector("#access-message");
     const categoryList = document.querySelector("#category-list");
@@ -215,7 +219,7 @@
       }
     };
     const show = (name) => {
-      const target = session.complete && name !== "thankYou" ? "thankYou" : name;
+      const target = session.complete && name !== "thankYou" && name !== "closed" ? "thankYou" : name;
       Object.entries(screens).forEach(([key, screen]) => screen.classList.toggle("is-visible", key === target));
     };
     const message = (element, text) => { element.textContent = text; };
@@ -320,6 +324,7 @@
             renderCategories();
           }
         }
+        if (result.data.error === "closed") { show("closed"); return; }
         const errors = { already_voted: "This category has already been recorded.", closed: "Voting has closed.", not_open: "Voting has not opened yet.", invalid_link: "This voting link is no longer valid.", email_mismatch: "That email does not match this voting link.", rate_limited: "Too many attempts. Please wait a moment.", network_error: "Connection failed. Please try again." };
         message(nomineeStatus, errors[result.data.error] || "We could not record that vote. Please try again.");
         return;
@@ -342,7 +347,7 @@
       const result = await api("session", { fp: session.fp });
       if (result.status !== 200) { message(accessMessage, "We could not open the ballot. Please try again."); return; }
       if (result.data.state === "not_open") { message(accessMessage, "Voting has not opened yet."); return; }
-      if (result.data.state === "closed") { message(accessMessage, "Voting has closed."); return; }
+      if (result.data.state === "closed") { show("closed"); return; }
       if (result.data.step === "complete") {
         session.complete = true;
         session.voted = normalizeVoted(result.data.votedCategories);
